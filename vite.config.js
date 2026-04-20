@@ -6,6 +6,9 @@ import { fileURLToPath } from 'url';
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 export default defineConfig({
+  // Base path for deployed site. Use the repo name for GitHub Pages
+  // If you prefer relative paths (works on GH Pages and local file preview), use "./"
+  base: '/Project-lead-ui/',
   plugins: [react()],
   resolve: {
     alias: {
