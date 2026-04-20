@@ -11,3 +11,4 @@ Pequeña interfaz web para el dashboard "Project Lead".
 - axios
 - date-fns
 - lucide-react
+- shadcn
