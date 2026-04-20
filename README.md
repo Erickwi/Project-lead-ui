@@ -1,6 +1,6 @@
 # Project Lead — Frontend
 
-Pequeña interfaz web para el dashboard "Project Lead" para manejar jira.
+Pequeña interfaz web para el dashboard "Project Lead" para manejar jira y más.
 
 **Tecnologías**
 
