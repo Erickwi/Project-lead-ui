@@ -2,13 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { format, parseISO, isValid } from "date-fns";
 import { Button } from "@/components/ui/button";
 
@@ -31,7 +25,9 @@ function buildText({ titulo, fecha, horas, version, altreVersioni, cliente, serv
     versionLine,
     `Responsable: ${responsable || "—"}`,
     `Estado: ${estado || "—"}`,
-  ].filter(Boolean).join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 /* ── component ────────────────────────────────────────────── */
@@ -69,16 +65,31 @@ export default function ServerUpdateModal({ open, onClose, doneTickets = [] }) {
       })
       .filter(Boolean)
       .join(", ");
-    const ids = doneTickets.map((t) => (t.id ? t.id : t.key)).filter(Boolean).join(", ");
+    const ids = doneTickets
+      .map((t) => (t.id ? t.id : t.key))
+      .filter(Boolean)
+      .join(", ");
     const servidorFromTickets = doneTickets[0]?.servidor || "";
     const responsableFromTickets = doneTickets[0]?.assignee || "";
     const estadoDefault = "OK.";
     // If there are no tickets, provide the explicit sample template from user.
     const sampleText = `ACTUALIZACIÓN SERVIDOR\n\nFecha: 16/04/2026 | Hora: 14:15 y 18:15\nServidor: FMA\nVersión: 3.10.6+3.10.7 (858, 927)\nResponsable: Jairo Proaño\nEstado: OK.`;
 
-    const defaultText = doneTickets && doneTickets.length
-      ? buildText({ titulo: "ACTUALIZACIÓN SERVIDOR", fecha, horas, version, altreVersioni, cliente, servidor: servidorFromTickets, responsable: responsableFromTickets, estado: estadoDefault, ids })
-      : sampleText;
+    const defaultText =
+      doneTickets && doneTickets.length
+        ? buildText({
+            titulo: "ACTUALIZACIÓN SERVIDOR",
+            fecha,
+            horas,
+            version,
+            altreVersioni,
+            cliente,
+            servidor: servidorFromTickets,
+            responsable: responsableFromTickets,
+            estado: estadoDefault,
+            ids,
+          })
+        : sampleText;
 
     try {
       const saved = localStorage.getItem("serverUpdate_previewText");

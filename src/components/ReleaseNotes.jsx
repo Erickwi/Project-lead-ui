@@ -118,12 +118,13 @@ export default function ReleaseNotes({ open, onClose }) {
                         setOrderedTickets(copy);
                         dragIndexRef.current = null;
                       }}
-                      className="flex items-center gap-3 px-3 py-2 rounded bg-muted/30 hover:bg-muted/40 cursor-move"
-                    >
+                      className="flex items-center gap-3 px-3 py-2 rounded bg-muted/30 hover:bg-muted/40 cursor-move">
                       <div className="w-6 text-xs text-muted-foreground">≡</div>
                       <div className="flex-1 min-w-0">
                         <div className="text-xs font-bold">{t.key}</div>
-                        <div className="text-sm text-foreground/80 truncate" title={t.summary}>{t.summary}</div>
+                        <div className="text-sm text-foreground/80 truncate" title={t.summary}>
+                          {t.summary}
+                        </div>
                       </div>
                       <div className="text-xs text-muted-foreground">{t.assignee}</div>
                     </div>
