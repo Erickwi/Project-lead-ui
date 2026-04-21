@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DatePicker } from "@/components/ui/date-picker";
 import { MarkdownText } from "@/components/ui/markdown-text";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 const CLIENTES = ["OCA", "Rocalvi", "FMA", "Chavez", "Pacustoms", "Lopez Mena"];
@@ -19,7 +20,6 @@ const PRIORITY_BADGE = {
 
 const JIRA_BASE = "https://qualitysoftec.atlassian.net/browse/";
 
-// Returns value only if it is a valid ISO date string (YYYY-MM-DD), otherwise ""
 const normalizeDate = (val) => {
   if (!val) return "";
   const d = parseISO(val);
@@ -30,29 +30,46 @@ export default function TicketRow({ ticket, onUpdate }) {
   const [open, setOpen] = useState(false);
   const [cliente, setCliente] = useState(ticket.cliente_nombre || "");
   const [dia, setDia] = useState(normalizeDate(ticket.dia_despliegue));
+  const [otrasVersiones, setOtrasVersiones] = useState(ticket.otrasVersiones || "");
+  const [mostrarClienteDespliegue, setMostrarClienteDespliegue] = useState(ticket.mostrarClienteDespliegue !== false);
 
   useEffect(() => {
     setCliente(ticket.cliente_nombre || "");
     setDia(normalizeDate(ticket.dia_despliegue));
-  }, [ticket.cliente_nombre, ticket.dia_despliegue]);
+    setOtrasVersiones(ticket.otrasVersiones || "");
+    setMostrarClienteDespliegue(ticket.mostrarClienteDespliegue !== false);
+  }, [ticket.cliente_nombre, ticket.dia_despliegue, ticket.otrasVersiones, ticket.mostrarClienteDespliegue]);
 
-  const persist = (newCliente, newDia) => {
+  const persist = (updates) => {
     onUpdate(ticket.key, {
-      cliente_nombre: newCliente,
-      dia_despliegue: newDia,
+      cliente_nombre: updates.cliente_nombre,
+      dia_despliegue: updates.dia_despliegue,
       estado_entrega: ticket.estado_entrega,
+      otrasVersiones: updates.otrasVersiones,
+      mostrarClienteDespliegue: updates.mostrarClienteDespliegue,
     });
   };
 
   const handleChangeCliente = (val) => {
     const newVal = val === "__none__" ? "" : val;
     setCliente(newVal);
-    persist(newVal, dia);
+    persist({ cliente_nombre: newVal, dia_despliegue: dia, otrasVersiones, mostrarClienteDespliegue });
   };
 
   const handleChangeDia = (val) => {
     setDia(val);
-    persist(cliente, val);
+    persist({ cliente_nombre: cliente, dia_despliegue: val, otrasVersiones, mostrarClienteDespliegue });
+  };
+
+  const handleChangeOtrasVersiones = (val) => {
+    setOtrasVersiones(val);
+    persist({ cliente_nombre: cliente, dia_despliegue: dia, otrasVersiones: val, mostrarClienteDespliegue });
+  };
+
+  const handleChangeMostrarClienteDespliegue = (val) => {
+    const newVal = val === "si";
+    setMostrarClienteDespliegue(newVal);
+    persist({ cliente_nombre: cliente, dia_despliegue: dia, otrasVersiones, mostrarClienteDespliegue: newVal });
   };
 
   const badgeClass = PRIORITY_BADGE[ticket.priority] || PRIORITY_BADGE.Medium;
@@ -91,6 +108,13 @@ export default function TicketRow({ ticket, onUpdate }) {
         <span className="flex-1 text-sm truncate min-w-0" title={ticket.summary}>
           {ticket.summary}
         </span>
+
+        {/* Otras versiones (compact) */}
+        {ticket.otrasVersiones && (
+          <span className="text-xs text-muted-foreground flex-shrink-0" title={`Otras versiones: ${ticket.otrasVersiones}`}>
+            📌 {ticket.otrasVersiones}
+          </span>
+        )}
 
         {/* Fecha + urgencia */}
         <span
@@ -134,23 +158,57 @@ export default function TicketRow({ ticket, onUpdate }) {
               </p>
             </div>
 
-            {/* Despliegue */}
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Despliegue</p>
-              <Select value={cliente || "__none__"} onValueChange={handleChangeCliente}>
-                <SelectTrigger className="mb-2 h-8 text-sm" onClick={(e) => e.stopPropagation()}>
-                  <SelectValue placeholder="Cliente..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">Sin cliente</SelectItem>
-                  {CLIENTES.map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <DatePicker value={dia} onChange={handleChangeDia} placeholder="Fecha de despliegue..." />
+            {/* Despliegue - solo se muestra si mostrarClienteDespliegue es true */}
+            {mostrarClienteDespliegue && (
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Despliegue</p>
+                <Select value={cliente || "__none__"} onValueChange={handleChangeCliente}>
+                  <SelectTrigger className="mb-2 h-8 text-sm" onClick={(e) => e.stopPropagation()}>
+                    <SelectValue placeholder="Cliente..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">Sin cliente</SelectItem>
+                    {CLIENTES.map((c) => (
+                      <SelectItem key={c} value={c}>
+                        {c}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <DatePicker value={dia} onChange={handleChangeDia} placeholder="Fecha de despliegue..." />
+              </div>
+            )}
+          </div>
+
+          {/* Otras versiones ySwitch mostrar cliente */}
+          <div className="mt-4">
+            <Separator className="mb-3" />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                  Otras versiones (tickets de otras aplicaciones)
+                </p>
+                <Input
+                  placeholder="Ej: APP-123, WEB-456"
+                  value={otrasVersiones}
+                  onChange={(e) => handleChangeOtrasVersiones(e.target.value)}
+                  className="h-8 text-sm"
+                />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                  Mostrar cliente y despliegue
+                </p>
+                <Select value={mostrarClienteDespliegue ? "si" : "no"} onValueChange={handleChangeMostrarClienteDespliegue}>
+                  <SelectTrigger className="h-8 text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="si">Sí</SelectItem>
+                    <SelectItem value="no">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 

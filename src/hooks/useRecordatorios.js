@@ -36,5 +36,10 @@ export function useRecordatorios() {
     setRecordatorios(prev => prev.filter(r => r.id !== id));
   };
 
-  return { recordatorios, loading, crear, actualizar, eliminar };
+  const reorder = async (orden) => {
+    await api.put('/recordatorios/reorder', { orden });
+    await fetchAll();
+  };
+
+  return { recordatorios, loading, crear, actualizar, eliminar, reorder };
 }

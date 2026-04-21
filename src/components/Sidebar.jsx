@@ -24,15 +24,54 @@ const PRIORITY_CFG = {
     dot: "bg-yellow-400",
   },
   Baja: { border: "border-l-green-500", badge: "bg-green-100 text-green-700 hover:bg-green-100", dot: "bg-green-500" },
+  Verde: { border: "border-l-emerald-500", badge: "bg-emerald-100 text-emerald-700 hover:bg-emerald-100", dot: "bg-emerald-500" },
 };
 
 const EMPTY_FORM = { descripcion: "", prioridad: "Media", fecha: "" };
 
 export default function Sidebar() {
-  const { recordatorios, loading, crear, actualizar, eliminar } = useRecordatorios();
+  const { recordatorios, loading, crear, actualizar, eliminar, reorder } = useRecordatorios();
   const [modal, setModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
+
+  const sortedRecordatorios = [...recordatorios].sort((a, b) => {
+    if (a.prioridad === "Verde" && b.prioridad !== "Verde") return 1;
+    if (a.prioridad !== "Verde" && b.prioridad === "Verde") return -1;
+    return (a.posicion || 0) - (b.posicion || 0);
+  });
+
+  const moveUp = async (index) => {
+    if (index === 0) return;
+    const newOrden = [...recordatorios].sort((a, b) => {
+      if (a.prioridad === "Verde" && b.prioridad !== "Verde") return 1;
+      if (a.prioridad !== "Verde" && b.prioridad === "Verde") return -1;
+      return (a.posicion || 0) - (b.posicion || 0);
+    });
+    const idActual = newOrden[index].id;
+    const idArriba = newOrden[index - 1].id;
+    const ids = newOrden.map((r) => r.id);
+    const idxA = ids.indexOf(idActual);
+    const idxB = ids.indexOf(idArriba);
+    [ids[idxA], ids[idxB]] = [ids[idxB], ids[idxA]];
+    await reorder(ids);
+  };
+
+  const moveDown = async (index) => {
+    if (index === sortedRecordatorios.length - 1) return;
+    const newOrden = [...recordatorios].sort((a, b) => {
+      if (a.prioridad === "Verde" && b.prioridad !== "Verde") return 1;
+      if (a.prioridad !== "Verde" && b.prioridad === "Verde") return -1;
+      return (a.posicion || 0) - (b.posicion || 0);
+    });
+    const idActual = newOrden[index].id;
+    const idAbajo = newOrden[index + 1].id;
+    const ids = newOrden.map((r) => r.id);
+    const idxA = ids.indexOf(idActual);
+    const idxB = ids.indexOf(idAbajo);
+    [ids[idxA], ids[idxB]] = [ids[idxB], ids[idxA]];
+    await reorder(ids);
+  };
 
   const openCreate = () => {
     setForm(EMPTY_FORM);
@@ -79,7 +118,7 @@ export default function Sidebar() {
         </div>
 
         {/* Lista */}
-        <ScrollArea className="flex-1 p-3">
+        <ScrollArea className="flex-1 p-3 overflow-y-auto">
           <div className="space-y-2">
             {loading && <p className="text-zinc-500 text-xs text-center mt-6">Cargando...</p>}
             {!loading && recordatorios.length === 0 && (
@@ -89,15 +128,36 @@ export default function Sidebar() {
                 Crea el primero con el botón +
               </p>
             )}
-            {recordatorios.map((rec) => {
+            {sortedRecordatorios.map((rec, idx) => {
               const cfg = PRIORITY_CFG[rec.prioridad] || PRIORITY_CFG.Media;
+              const isVerde = rec.prioridad === "Verde";
               return (
                 <div
                   key={rec.id}
-                  className={`bg-zinc-900 border-l-4 ${cfg.border} rounded-r-lg p-3 group transition-all hover:bg-zinc-800`}>
+                  className={`bg-zinc-900 border-l-4 ${cfg.border} rounded-r-lg p-3 group transition-all hover:bg-zinc-800 ${isVerde ? "opacity-60" : ""}`}>
                   <div className="flex items-start justify-between gap-2">
                     <p className="text-sm text-zinc-100 flex-1 leading-snug break-words">{rec.descripcion}</p>
-                    <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 pt-0.5">
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                      <div className="flex flex-col">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => moveUp(idx)}
+                          title="Subir"
+                          disabled={idx === 0 || (sortedRecordatorios[idx - 1].prioridad === "Verde" && !isVerde)}
+                          className="h-5 w-5 text-zinc-400 hover:text-zinc-100 hover:bg-transparent text-[10px]">
+                          ▲
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => moveDown(idx)}
+                          title="Bajar"
+                          disabled={idx === sortedRecordatorios.length - 1 || (sortedRecordatorios[idx + 1]?.prioridad === "Verde" && !isVerde)}
+                          className="h-5 w-5 text-zinc-400 hover:text-zinc-100 hover:bg-transparent text-[10px]">
+                          ▼
+                        </Button>
+                      </div>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -175,6 +235,7 @@ export default function Sidebar() {
                     <SelectItem value="Alta">Alta</SelectItem>
                     <SelectItem value="Media">Media</SelectItem>
                     <SelectItem value="Baja">Baja</SelectItem>
+                    <SelectItem value="Verde">Verde</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
