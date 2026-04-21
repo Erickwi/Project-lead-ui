@@ -20,16 +20,15 @@ function fmtFecha(iso) {
   return isValid(d) ? format(d, "dd/MM/yyyy") : iso;
 }
 
-function buildText({ titulo, fecha, horas, version, altreVersioni, cliente, servidor, responsable, estado }) {
+function buildText({ titulo, fecha, horas, version, altreVersioni, cliente, servidor, responsable, estado, ids }) {
   const horasStr = (horas || []).filter(Boolean).join(" y ") || "—";
+  const versionLine = version ? `Versión: ${version}${ids ? ` (${ids})` : ""}` : "Versión: —";
   return [
     titulo || "ACTUALIZACIÓN SERVIDOR",
     "",
     `Fecha: ${fmtFecha(fecha)} | Hora: ${horasStr}`,
-    `Cliente: ${cliente || "—"}`,
-    `Servidor: ${servidor || "—"}`,
-    `Versión: ${version || "—"}`,
-    altreVersioni ? `Otras versiones: ${altreVersioni}` : "",
+    `Servidor: ${servidor || cliente || "—"}`,
+    versionLine,
     `Responsable: ${responsable || "—"}`,
     `Estado: ${estado || "—"}`,
   ].filter(Boolean).join("\n");
@@ -70,12 +69,22 @@ export default function ServerUpdateModal({ open, onClose, doneTickets = [] }) {
       })
       .filter(Boolean)
       .join(", ");
-    const defaultText = buildText({ titulo: "ACTUALIZACIÓN SERVIDOR", fecha, horas, version, altreVersioni, cliente });
+    const ids = doneTickets.map((t) => (t.id ? t.id : t.key)).filter(Boolean).join(", ");
+    const servidorFromTickets = doneTickets[0]?.servidor || "";
+    const responsableFromTickets = doneTickets[0]?.assignee || "";
+    const estadoDefault = "OK.";
+    // If there are no tickets, provide the explicit sample template from user.
+    const sampleText = `ACTUALIZACIÓN SERVIDOR\n\nFecha: 16/04/2026 | Hora: 14:15 y 18:15\nServidor: FMA\nVersión: 3.10.6+3.10.7 (858, 927)\nResponsable: Jairo Proaño\nEstado: OK.`;
+
+    const defaultText = doneTickets && doneTickets.length
+      ? buildText({ titulo: "ACTUALIZACIÓN SERVIDOR", fecha, horas, version, altreVersioni, cliente, servidor: servidorFromTickets, responsable: responsableFromTickets, estado: estadoDefault, ids })
+      : sampleText;
+
     try {
       const saved = localStorage.getItem("serverUpdate_previewText");
-      setPreviewText(saved ?? "[poner texto]");
+      setPreviewText(saved ?? defaultText);
     } catch (e) {
-      setPreviewText("[poner texto]");
+      setPreviewText(defaultText);
     }
   }, [open, doneTickets]);
 

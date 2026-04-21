@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import api from "../api/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,10 @@ const SPRINT_LABEL = "Versión 3.10.6.1 stable";
 
 export default function ReleaseNotes({ open, onClose }) {
   const [tickets, setTickets] = useState([]);
+  const [orderedTickets, setOrderedTickets] = useState([]);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const dragIndexRef = useRef(null);
 
   useEffect(() => {
     if (!open) return;
@@ -21,6 +23,11 @@ export default function ReleaseNotes({ open, onClose }) {
       .finally(() => setLoading(false));
   }, [open]);
 
+  // keep a local ordered copy so users can reorder via drag-and-drop
+  useEffect(() => {
+    setOrderedTickets(tickets || []);
+  }, [tickets]);
+
   const generateText = () => {
     const divider = "═".repeat(56);
     const header = [
@@ -31,7 +38,7 @@ export default function ReleaseNotes({ open, onClose }) {
       "",
     ].join("\n");
 
-    const lines = tickets
+    const lines = (orderedTickets.length ? orderedTickets : tickets)
       .map((t, i) =>
         [
           `${i + 1}. [${t.key}] ${t.summary}`,
@@ -87,9 +94,47 @@ export default function ReleaseNotes({ open, onClose }) {
           )}
 
           {!loading && tickets.length > 0 && (
-            <pre className="rounded-lg p-4 text-sm text-foreground whitespace-pre-wrap break-words font-mono leading-relaxed border bg-muted/40 w-full">
-              {generateText()}
-            </pre>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <p className="text-xs font-semibold">Arrastra para reordenar</p>
+                <div className="space-y-1">
+                  {(orderedTickets.length ? orderedTickets : tickets).map((t, idx) => (
+                    <div
+                      key={t.key}
+                      draggable
+                      onDragStart={(e) => {
+                        dragIndexRef.current = idx;
+                        e.dataTransfer.effectAllowed = "move";
+                      }}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        const from = dragIndexRef.current;
+                        const to = idx;
+                        if (from == null) return;
+                        const copy = Array.from(orderedTickets.length ? orderedTickets : tickets);
+                        const [moved] = copy.splice(from, 1);
+                        copy.splice(to, 0, moved);
+                        setOrderedTickets(copy);
+                        dragIndexRef.current = null;
+                      }}
+                      className="flex items-center gap-3 px-3 py-2 rounded bg-muted/30 hover:bg-muted/40 cursor-move"
+                    >
+                      <div className="w-6 text-xs text-muted-foreground">≡</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-bold">{t.key}</div>
+                        <div className="text-sm text-foreground/80 truncate" title={t.summary}>{t.summary}</div>
+                      </div>
+                      <div className="text-xs text-muted-foreground">{t.assignee}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <pre className="rounded-lg p-4 text-sm text-foreground whitespace-pre-wrap break-words font-mono leading-relaxed border bg-muted/40 w-full">
+                {generateText()}
+              </pre>
+            </div>
           )}
         </ScrollArea>
       </DialogContent>
