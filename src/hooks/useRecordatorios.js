@@ -36,9 +36,21 @@ export function useRecordatorios() {
     setRecordatorios(prev => prev.filter(r => r.id !== id));
   };
 
-  const reorder = async (orden) => {
-    await api.put('/recordatorios/reorder', { orden });
-    await fetchAll();
+  const reorder = (orden) => {
+    const intOrden = orden.map(id => Number(id));
+    // Actualizar estado inmediatamente (optimistic)
+    setRecordatorios(prev => {
+      const sorted = [...prev].sort((a, b) => {
+        const idxA = intOrden.indexOf(Number(a.id));
+        const idxB = intOrden.indexOf(Number(b.id));
+        return idxA - idxB;
+      });
+      return sorted.map((r, i) => ({ ...r, posicion: i + 1 }));
+    });
+    // Llamada API en background
+    api.put('/recordatorios/reorder', { orden: intOrden }).catch(err => {
+      console.error('Error reorder:', err.message);
+    });
   };
 
   return { recordatorios, loading, crear, actualizar, eliminar, reorder };

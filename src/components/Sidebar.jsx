@@ -15,6 +15,22 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 const PRIORITY_CFG = {
   Alta: { border: "border-l-red-500", badge: "bg-red-100 text-red-700 hover:bg-red-100", dot: "bg-red-500" },
@@ -27,7 +43,80 @@ const PRIORITY_CFG = {
   Verde: { border: "border-l-emerald-500", badge: "bg-emerald-100 text-emerald-700 hover:bg-emerald-100", dot: "bg-emerald-500" },
 };
 
-const EMPTY_FORM = { descripcion: "", prioridad: "Media", fecha: "" };
+function getTodayDate() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+const EMPTY_FORM = { descripcion: "", prioridad: "Media", fecha: getTodayDate() };
+
+function SortableItem({ rec, onEdit, onDelete }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: rec.id,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 1000 : "auto",
+  };
+
+  const cfg = PRIORITY_CFG[rec.prioridad] || PRIORITY_CFG.Media;
+  const isVerde = rec.prioridad === "Verde";
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className={`bg-zinc-900 border-l-4 ${cfg.border} rounded-r-lg p-3 group transition-all hover:bg-zinc-800 cursor-grab active:cursor-grabbing ${isVerde ? "opacity-60" : ""}`}>
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-sm text-zinc-100 flex-1 leading-snug break-words">{rec.descripcion}</p>
+        <div className="flex gap-1 flex-shrink-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(rec);
+            }}
+            title="Editar"
+            className="h-6 w-6 text-zinc-400 hover:text-zinc-100 hover:bg-transparent">
+            ✏️
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(rec.id);
+            }}
+            title="Eliminar"
+            className="h-6 w-6 text-zinc-400 hover:text-red-400 hover:bg-transparent">
+            🗑️
+          </Button>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 mt-2">
+        <Badge className={`text-xs font-semibold ${cfg.badge}`}>{rec.prioridad}</Badge>
+        {rec.fecha && (
+          <span className="text-xs text-zinc-500">
+            {new Date(rec.fecha).toLocaleDateString("es-ES", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            })}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function Sidebar() {
   const { recordatorios, loading, crear, actualizar, eliminar, reorder } = useRecordatorios();
@@ -35,46 +124,35 @@ export default function Sidebar() {
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
 
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   const sortedRecordatorios = [...recordatorios].sort((a, b) => {
     if (a.prioridad === "Verde" && b.prioridad !== "Verde") return 1;
     if (a.prioridad !== "Verde" && b.prioridad === "Verde") return -1;
     return (a.posicion || 0) - (b.posicion || 0);
   });
 
-  const moveUp = async (index) => {
-    if (index === 0) return;
-    const newOrden = [...recordatorios].sort((a, b) => {
-      if (a.prioridad === "Verde" && b.prioridad !== "Verde") return 1;
-      if (a.prioridad !== "Verde" && b.prioridad === "Verde") return -1;
-      return (a.posicion || 0) - (b.posicion || 0);
-    });
-    const idActual = newOrden[index].id;
-    const idArriba = newOrden[index - 1].id;
-    const ids = newOrden.map((r) => r.id);
-    const idxA = ids.indexOf(idActual);
-    const idxB = ids.indexOf(idArriba);
-    [ids[idxA], ids[idxB]] = [ids[idxB], ids[idxA]];
-    await reorder(ids);
-  };
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
 
-  const moveDown = async (index) => {
-    if (index === sortedRecordatorios.length - 1) return;
-    const newOrden = [...recordatorios].sort((a, b) => {
-      if (a.prioridad === "Verde" && b.prioridad !== "Verde") return 1;
-      if (a.prioridad !== "Verde" && b.prioridad === "Verde") return -1;
-      return (a.posicion || 0) - (b.posicion || 0);
-    });
-    const idActual = newOrden[index].id;
-    const idAbajo = newOrden[index + 1].id;
-    const ids = newOrden.map((r) => r.id);
-    const idxA = ids.indexOf(idActual);
-    const idxB = ids.indexOf(idAbajo);
-    [ids[idxA], ids[idxB]] = [ids[idxB], ids[idxA]];
-    await reorder(ids);
+    const oldIndex = sortedRecordatorios.findIndex((r) => r.id === active.id);
+    const newIndex = sortedRecordatorios.findIndex((r) => r.id === over.id);
+
+    const newSorted = arrayMove(sortedRecordatorios, oldIndex, newIndex);
+    const newIds = newSorted.map((r) => Number(r.id));
+    
+    // Optimistic update - reorder hace la llamada API sin await
+    reorder(newIds);
   };
 
   const openCreate = () => {
-    setForm(EMPTY_FORM);
+    setForm({ ...EMPTY_FORM, fecha: getTodayDate() });
     setEditingId(null);
     setModal(true);
   };
@@ -83,7 +161,7 @@ export default function Sidebar() {
     setForm({
       descripcion: rec.descripcion,
       prioridad: rec.prioridad,
-      fecha: rec.fecha ? rec.fecha.split("T")[0] : "",
+      fecha: rec.fecha ? rec.fecha.split("T")[0] : getTodayDate(),
     });
     setEditingId(rec.id);
     setModal(true);
@@ -119,79 +197,33 @@ export default function Sidebar() {
 
         {/* Lista */}
         <ScrollArea className="flex-1 p-3 overflow-y-auto">
-          <div className="space-y-2">
-            {loading && <p className="text-zinc-500 text-xs text-center mt-6">Cargando...</p>}
-            {!loading && recordatorios.length === 0 && (
-              <p className="text-zinc-500 text-xs text-center mt-8 leading-relaxed">
-                Sin recordatorios aún.
-                <br />
-                Crea el primero con el botón +
-              </p>
-            )}
-            {sortedRecordatorios.map((rec, idx) => {
-              const cfg = PRIORITY_CFG[rec.prioridad] || PRIORITY_CFG.Media;
-              const isVerde = rec.prioridad === "Verde";
-              return (
-                <div
-                  key={rec.id}
-                  className={`bg-zinc-900 border-l-4 ${cfg.border} rounded-r-lg p-3 group transition-all hover:bg-zinc-800 ${isVerde ? "opacity-60" : ""}`}>
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="text-sm text-zinc-100 flex-1 leading-snug break-words">{rec.descripcion}</p>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-                      <div className="flex flex-col">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => moveUp(idx)}
-                          title="Subir"
-                          disabled={idx === 0 || (sortedRecordatorios[idx - 1].prioridad === "Verde" && !isVerde)}
-                          className="h-5 w-5 text-zinc-400 hover:text-zinc-100 hover:bg-transparent text-[10px]">
-                          ▲
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => moveDown(idx)}
-                          title="Bajar"
-                          disabled={idx === sortedRecordatorios.length - 1 || (sortedRecordatorios[idx + 1]?.prioridad === "Verde" && !isVerde)}
-                          className="h-5 w-5 text-zinc-400 hover:text-zinc-100 hover:bg-transparent text-[10px]">
-                          ▼
-                        </Button>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => openEdit(rec)}
-                        title="Editar"
-                        className="h-6 w-6 text-zinc-400 hover:text-zinc-100 hover:bg-transparent">
-                        ✏️
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => eliminar(rec.id)}
-                        title="Eliminar"
-                        className="h-6 w-6 text-zinc-400 hover:text-red-400 hover:bg-transparent">
-                        🗑️
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 mt-2">
-                    <Badge className={`text-xs font-semibold ${cfg.badge}`}>{rec.prioridad}</Badge>
-                    {rec.fecha && (
-                      <span className="text-xs text-zinc-500">
-                        {new Date(rec.fecha).toLocaleDateString("es-ES", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                        })}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}>
+            <SortableContext
+              items={sortedRecordatorios.map((r) => r.id)}
+              strategy={verticalListSortingStrategy}>
+              <div className="space-y-2">
+                {loading && <p className="text-zinc-500 text-xs text-center mt-6">Cargando...</p>}
+                {!loading && recordatorios.length === 0 && (
+                  <p className="text-zinc-500 text-xs text-center mt-8 leading-relaxed">
+                    Sin recordatorios aún.
+                    <br />
+                    Crea el primero con el botón +
+                  </p>
+                )}
+                {sortedRecordatorios.map((rec) => (
+                  <SortableItem
+                    key={rec.id}
+                    rec={rec}
+                    onEdit={openEdit}
+                    onDelete={eliminar}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
         </ScrollArea>
 
         {/* Footer version */}
