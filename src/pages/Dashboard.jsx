@@ -62,7 +62,9 @@ export default function Dashboard() {
         {/* Top bar */}
         <header className="bg-background border-b px-4 sm:px-6 py-3 flex flex-wrap items-center gap-x-4 gap-y-2 flex-shrink-0 shadow-sm">
           <div className="min-w-0 flex-1">
-            <h1 className="text-base sm:text-xl font-bold tracking-tight leading-tight">📊 Centro de Mando — Project Lead</h1>
+            <h1 className="text-base sm:text-xl font-bold tracking-tight leading-tight">
+              📊 Centro de Mando — Project Lead
+            </h1>
             <p className="text-xs text-muted-foreground mt-0.5 truncate">
               Sprint: Versión 3.10.6.1 stable · Proyecto Ecomex 360
             </p>
@@ -83,8 +85,20 @@ export default function Dashboard() {
             )}
 
             {/* Sincronizar */}
-            <Button variant="outline" size="sm" onClick={handleSync} disabled={syncing} className="text-xs sm:text-sm whitespace-nowrap">
-              {syncing ? "⏳ Sincronizando..." : <><span>🔄</span><span className="hidden sm:inline"> Sincronizar Jira</span></>}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSync}
+              disabled={syncing}
+              className="text-xs sm:text-sm whitespace-nowrap">
+              {syncing ? (
+                "⏳ Sincronizando..."
+              ) : (
+                <>
+                  <span>🔄</span>
+                  <span className="hidden sm:inline"> Sincronizar Jira</span>
+                </>
+              )}
             </Button>
 
             {/* Actualización Servidor */}
@@ -93,17 +107,27 @@ export default function Dashboard() {
               size="sm"
               onClick={() => setServerUpdateOpen(true)}
               className="text-xs sm:text-sm font-medium whitespace-nowrap">
-              <span>🖥️</span><span className="hidden sm:inline"> Actualización Servidor</span>
+              <span>🖥️</span>
+              <span className="hidden sm:inline"> Actualización Servidor</span>
             </Button>
 
             {/* Cambios Jira (notificaciones) */}
-            <Button variant="outline" size="sm" onClick={() => setChangesOpen(true)} className="text-xs sm:text-sm font-medium whitespace-nowrap">
-              🔔<span className="hidden sm:inline"> Cambios</span>{ticketChanges.length > 0 && ` (${ticketChanges.length})`}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setChangesOpen(true)}
+              className="text-xs sm:text-sm font-medium whitespace-nowrap">
+              🔔<span className="hidden sm:inline"> Cambios</span>
+              {ticketChanges.length > 0 && ` (${ticketChanges.length})`}
             </Button>
 
             {/* Plan de Despliegue */}
-            <Button size="sm" onClick={() => setDrawerOpen(true)} className="font-bold shadow-sm text-xs sm:text-sm whitespace-nowrap">
-              <span>📅</span><span className="hidden sm:inline"> Plan de Despliegue</span>
+            <Button
+              size="sm"
+              onClick={() => setDrawerOpen(true)}
+              className="font-bold shadow-sm text-xs sm:text-sm whitespace-nowrap">
+              <span>📅</span>
+              <span className="hidden sm:inline"> Plan de Despliegue</span>
             </Button>
           </div>
         </header>
