@@ -24,6 +24,8 @@ function DevCard({ nombre, tickets, onUpdate }) {
   const style = loadStyle(totalHoras);
 
   const sorted = [...tickets].sort((a, b) => a.priorityOrder - b.priorityOrder);
+  const totalSubtasks = tickets.reduce((s, t) => s + (t.subtasks?.length || 0), 0);
+  const totalItems = tickets.length + totalSubtasks;
 
   return (
     <Card className="mb-4 overflow-hidden shadow-sm">
@@ -36,7 +38,7 @@ function DevCard({ nombre, tickets, onUpdate }) {
             <span className="text-muted-foreground/40 text-sm">{open ? "▼" : "▶"}</span>
             <span className="font-semibold text-sm">👤 {nombre}</span>
             <Badge variant="secondary" className="text-xs rounded-full">
-              {tickets.length} {tickets.length === 1 ? "ticket" : "tickets"}
+              {totalItems} {totalItems === 1 ? "ticket" : "tickets"}
             </Badge>
           </div>
           <Badge className={cn("text-xs font-bold", style.badge)}>Carga: {totalHoras}h</Badge>

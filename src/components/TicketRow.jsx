@@ -104,6 +104,18 @@ export default function TicketRow({ ticket, onUpdate }) {
         {/* Badge prioridad */}
         <Badge className={cn("text-xs font-semibold flex-shrink-0 border", badgeClass)}>{ticket.priority}</Badge>
 
+        {/* Indicador subtask o hijos */}
+        {ticket.isSubtask && (
+          <Badge variant="outline" className="text-xs flex-shrink-0 text-violet-600 border-violet-300 bg-violet-50">
+            ↳ subtask
+          </Badge>
+        )}
+        {!ticket.isSubtask && ticket.subtasks?.length > 0 && (
+          <Badge variant="outline" className="text-xs flex-shrink-0 text-blue-600 border-blue-300 bg-blue-50">
+            ⊞ {ticket.subtasks.length} sub
+          </Badge>
+        )}
+
         {/* Resumen */}
         <span className="flex-1 text-sm truncate min-w-0" title={ticket.summary}>
           {ticket.summary}
@@ -111,7 +123,9 @@ export default function TicketRow({ ticket, onUpdate }) {
 
         {/* Otras versiones (compact) */}
         {ticket.otrasVersiones && (
-          <span className="text-xs text-muted-foreground flex-shrink-0" title={`Otras versiones: ${ticket.otrasVersiones}`}>
+          <span
+            className="text-xs text-muted-foreground flex-shrink-0"
+            title={`Otras versiones: ${ticket.otrasVersiones}`}>
             📌 {ticket.otrasVersiones}
           </span>
         )}
@@ -144,6 +158,22 @@ export default function TicketRow({ ticket, onUpdate }) {
       {/* ── Panel expandido ── */}
       {open && (
         <div className="px-6 pb-5 pt-3 bg-muted/30 border-t animate-in fade-in-0 slide-in-from-top-2 duration-150">
+          {/* Padre (si es subtask) */}
+          {ticket.isSubtask && ticket.parent && (
+            <div className="mb-4 flex items-center gap-2 bg-violet-50 border border-violet-200 rounded-lg px-3 py-2">
+              <span className="text-xs text-violet-500 font-semibold uppercase tracking-wider">Parent</span>
+              <a
+                href={`${JIRA_BASE}${ticket.parent.key}`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs font-bold text-primary hover:underline"
+                onClick={(e) => e.stopPropagation()}>
+                {ticket.parent.key}
+              </a>
+              <span className="text-xs text-muted-foreground truncate">{ticket.parent.summary}</span>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 gap-5">
             {/* Revisores */}
             <div>
@@ -199,7 +229,9 @@ export default function TicketRow({ ticket, onUpdate }) {
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                   Mostrar cliente y despliegue
                 </p>
-                <Select value={mostrarClienteDespliegue ? "si" : "no"} onValueChange={handleChangeMostrarClienteDespliegue}>
+                <Select
+                  value={mostrarClienteDespliegue ? "si" : "no"}
+                  onValueChange={handleChangeMostrarClienteDespliegue}>
                   <SelectTrigger className="h-8 text-sm">
                     <SelectValue />
                   </SelectTrigger>
@@ -211,6 +243,44 @@ export default function TicketRow({ ticket, onUpdate }) {
               </div>
             </div>
           </div>
+
+          {/* Subtareas */}
+          {!ticket.isSubtask && ticket.subtasks?.length > 0 && (
+            <div className="mt-4">
+              <Separator className="mb-3" />
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                ⊞ Subtareas ({ticket.subtasks.length})
+              </p>
+              <div className="space-y-1.5">
+                {ticket.subtasks.map((s) => (
+                  <div key={s.key} className="flex items-center gap-2 bg-background border rounded-lg px-3 py-2">
+                    <a
+                      href={`${JIRA_BASE}${s.key}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs font-bold text-primary hover:underline flex-shrink-0"
+                      onClick={(e) => e.stopPropagation()}>
+                      {s.key}
+                    </a>
+                    <span className="text-xs flex-1 truncate text-foreground">{s.summary}</span>
+                    {s.assignee && <span className="text-xs text-muted-foreground flex-shrink-0">👤 {s.assignee}</span>}
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "text-xs flex-shrink-0",
+                        s.status === "Done" || s.status === "Finalizado"
+                          ? "border-green-300 text-green-700 bg-green-50"
+                          : s.status === "In Progress" || s.status === "En progreso"
+                            ? "border-blue-300 text-blue-700 bg-blue-50"
+                            : "text-muted-foreground",
+                      )}>
+                      {s.status}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Comentarios */}
           {ticket.comentarios.length > 0 && (
