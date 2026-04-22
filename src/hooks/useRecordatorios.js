@@ -21,19 +21,42 @@ export function useRecordatorios() {
 
   const crear = async (rec) => {
     const { data } = await api.post('/recordatorios', rec);
-    setRecordatorios(prev => [...prev, data]);
+    const newRec = data.recordatorio || data;
+    setRecordatorios(prev => [...prev, newRec]);
   };
 
   const actualizar = async (id, rec) => {
-    await api.put(`/recordatorios/${id}`, rec);
+    const idNum = Number(id);
+    await api.put(`/recordatorios/${idNum}`, rec);
     setRecordatorios(prev =>
-      prev.map(r => (r.id === id ? { ...r, ...rec } : r))
+      prev.map(r => (Number(r.id) === idNum ? { ...r, ...rec } : r))
     );
   };
 
   const eliminar = async (id) => {
-    await api.delete(`/recordatorios/${id}`);
-    setRecordatorios(prev => prev.filter(r => r.id !== id));
+    const idNum = Number(id);
+    // Optimistic update: archive deleted item to localStorage history
+    setRecordatorios(prev => {
+      const toDelete = prev.find(r => Number(r.id) === idNum);
+      if (toDelete) {
+        try {
+          const hist = JSON.parse(localStorage.getItem('deletedRecordatoriosHistory') || '[]');
+          hist.unshift({ ...toDelete, deletedAt: new Date().toISOString() });
+          localStorage.setItem('deletedRecordatoriosHistory', JSON.stringify(hist.slice(0, 100)));
+        } catch (err) {
+          console.error('Error archivando historial:', err.message);
+        }
+      }
+      return prev.filter(r => Number(r.id) !== idNum);
+    });
+
+    try {
+      await api.delete(`/recordatorios/${idNum}`);
+    } catch (err) {
+      console.error('Error eliminando recordatorio:', err.message);
+      // rollback by refetching
+      fetchAll();
+    }
   };
 
   const reorder = (orden) => {

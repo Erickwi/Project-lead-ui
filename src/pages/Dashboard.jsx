@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import Sidebar from "../components/Sidebar";
 import DevAccordion from "../components/DevAccordion";
 import DeployDrawer from "../components/DeployDrawer";
-import ReleaseNotes from "../components/ReleaseNotes";
 import DeployNotificationModal from "../components/DeployNotificationModal";
 import ServerUpdateModal from "../components/ServerUpdateModal";
 import { useTickets } from "../hooks/useTickets";
@@ -12,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 export default function Dashboard() {
   const { tickets, doneTickets, loading, error, refetch, updateTicketInfo, updateDeployStatus } = useTickets();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [relNotesOpen, setRelNotesOpen] = useState(false);
+  // Release Notes removed per UX request
   const [deployModalOpen, setDeployModalOpen] = useState(false);
   const [serverUpdateOpen, setServerUpdateOpen] = useState(false);
   const [serverUpdateTickets, setServerUpdateTickets] = useState([]);
@@ -61,36 +60,31 @@ export default function Dashboard() {
       {/* ── Área principal ── */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Top bar */}
-        <header className="bg-background border-b px-6 py-3 flex items-center justify-between flex-shrink-0 shadow-sm">
-          <div>
-            <h1 className="text-xl font-bold tracking-tight">📊 Centro de Mando — Project Lead</h1>
-            <p className="text-xs text-muted-foreground mt-0.5">
+        <header className="bg-background border-b px-4 sm:px-6 py-3 flex flex-wrap items-center gap-x-4 gap-y-2 flex-shrink-0 shadow-sm">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-base sm:text-xl font-bold tracking-tight leading-tight">📊 Centro de Mando — Project Lead</h1>
+            <p className="text-xs text-muted-foreground mt-0.5 truncate">
               Sprint: Versión 3.10.6.1 stable · Proyecto Ecomex 360
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {/* Contador activos */}
             {!loading && !error && (
-              <Badge variant="secondary" className="rounded-full text-xs">
+              <Badge variant="secondary" className="rounded-full text-xs whitespace-nowrap">
                 {tickets.length} activos
               </Badge>
             )}
             {/* Contador finalizados */}
             {!loading && !error && doneTickets.length > 0 && (
-              <Badge variant="outline" className="rounded-full text-xs text-muted-foreground">
+              <Badge variant="outline" className="rounded-full text-xs text-muted-foreground whitespace-nowrap">
                 {doneTickets.length} finalizados
               </Badge>
             )}
 
             {/* Sincronizar */}
-            <Button variant="outline" size="sm" onClick={handleSync} disabled={syncing} className="text-sm">
-              {syncing ? "⏳ Sincronizando..." : "🔄 Sincronizar Jira"}
-            </Button>
-
-            {/* Release Notes */}
-            <Button variant="outline" size="sm" onClick={() => setRelNotesOpen(true)} className="text-sm font-medium">
-              📝 Release Notes
+            <Button variant="outline" size="sm" onClick={handleSync} disabled={syncing} className="text-xs sm:text-sm whitespace-nowrap">
+              {syncing ? "⏳ Sincronizando..." : <><span>🔄</span><span className="hidden sm:inline"> Sincronizar Jira</span></>}
             </Button>
 
             {/* Actualización Servidor */}
@@ -98,18 +92,18 @@ export default function Dashboard() {
               variant="outline"
               size="sm"
               onClick={() => setServerUpdateOpen(true)}
-              className="text-sm font-medium">
-              🖥️ Actualización Servidor
+              className="text-xs sm:text-sm font-medium whitespace-nowrap">
+              <span>🖥️</span><span className="hidden sm:inline"> Actualización Servidor</span>
             </Button>
 
             {/* Cambios Jira (notificaciones) */}
-            <Button variant="outline" size="sm" onClick={() => setChangesOpen(true)} className="text-sm font-medium">
-              🔔 Cambios {ticketChanges.length > 0 && `(${ticketChanges.length})`}
+            <Button variant="outline" size="sm" onClick={() => setChangesOpen(true)} className="text-xs sm:text-sm font-medium whitespace-nowrap">
+              🔔<span className="hidden sm:inline"> Cambios</span>{ticketChanges.length > 0 && ` (${ticketChanges.length})`}
             </Button>
 
             {/* Plan de Despliegue */}
-            <Button size="sm" onClick={() => setDrawerOpen(true)} className="font-bold shadow-sm">
-              📅 Plan de Despliegue
+            <Button size="sm" onClick={() => setDrawerOpen(true)} className="font-bold shadow-sm text-xs sm:text-sm whitespace-nowrap">
+              <span>📅</span><span className="hidden sm:inline"> Plan de Despliegue</span>
             </Button>
           </div>
         </header>
@@ -161,8 +155,7 @@ export default function Dashboard() {
       {/* ── Drawer lateral ── */}
       <DeployDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} onOpenServerUpdate={openServerUpdateWith} />
 
-      {/* ── Modal Release Notes ── */}
-      <ReleaseNotes open={relNotesOpen} onClose={() => setRelNotesOpen(false)} />
+      {/* Release Notes modal removed */}
 
       {/* ── Modal Gestión de Despliegues ── */}
       <DeployNotificationModal

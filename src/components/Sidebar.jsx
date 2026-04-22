@@ -15,14 +15,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
@@ -40,7 +33,11 @@ const PRIORITY_CFG = {
     dot: "bg-yellow-400",
   },
   Baja: { border: "border-l-green-500", badge: "bg-green-100 text-green-700 hover:bg-green-100", dot: "bg-green-500" },
-  Verde: { border: "border-l-emerald-500", badge: "bg-emerald-100 text-emerald-700 hover:bg-emerald-100", dot: "bg-emerald-500" },
+  Verde: {
+    border: "border-l-emerald-500",
+    badge: "bg-emerald-100 text-emerald-700 hover:bg-emerald-100",
+    dot: "bg-emerald-500",
+  },
 };
 
 function getTodayDate() {
@@ -72,9 +69,7 @@ function SortableItem({ rec, onEdit, onDelete }) {
     <div
       ref={setNodeRef}
       style={style}
-      {...attributes}
-      {...listeners}
-      className={`bg-zinc-900 border-l-4 ${cfg.border} rounded-r-lg p-3 group transition-all hover:bg-zinc-800 cursor-grab active:cursor-grabbing ${isVerde ? "opacity-60" : ""}`}>
+      className={`bg-zinc-900 border-l-4 ${cfg.border} rounded-r-lg p-3 group transition-all hover:bg-zinc-800 ${isVerde ? "opacity-60" : ""}`}>
       <div className="flex items-start justify-between gap-2">
         <p className="text-sm text-zinc-100 flex-1 leading-snug break-words">{rec.descripcion}</p>
         <div className="flex gap-1 flex-shrink-0">
@@ -83,6 +78,7 @@ function SortableItem({ rec, onEdit, onDelete }) {
             size="icon"
             onClick={(e) => {
               e.stopPropagation();
+              console.debug("Sidebar edit clicked", rec.id);
               onEdit(rec);
             }}
             title="Editar"
@@ -94,6 +90,7 @@ function SortableItem({ rec, onEdit, onDelete }) {
             size="icon"
             onClick={(e) => {
               e.stopPropagation();
+              console.debug("Sidebar delete clicked", rec.id);
               onDelete(rec.id);
             }}
             title="Eliminar"
@@ -128,7 +125,7 @@ export default function Sidebar() {
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   const sortedRecordatorios = [...recordatorios].sort((a, b) => {
@@ -146,7 +143,7 @@ export default function Sidebar() {
 
     const newSorted = arrayMove(sortedRecordatorios, oldIndex, newIndex);
     const newIds = newSorted.map((r) => Number(r.id));
-    
+
     // Optimistic update - reorder hace la llamada API sin await
     reorder(newIds);
   };
@@ -197,13 +194,8 @@ export default function Sidebar() {
 
         {/* Lista */}
         <ScrollArea className="flex-1 p-3 overflow-y-auto">
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}>
-            <SortableContext
-              items={sortedRecordatorios.map((r) => r.id)}
-              strategy={verticalListSortingStrategy}>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={sortedRecordatorios.map((r) => r.id)} strategy={verticalListSortingStrategy}>
               <div className="space-y-2">
                 {loading && <p className="text-zinc-500 text-xs text-center mt-6">Cargando...</p>}
                 {!loading && recordatorios.length === 0 && (
@@ -218,7 +210,15 @@ export default function Sidebar() {
                     key={rec.id}
                     rec={rec}
                     onEdit={openEdit}
-                    onDelete={eliminar}
+                    onDelete={async (id) => {
+                      const ok = confirm("¿Estás seguro que quieres eliminar esta nota?");
+                      if (!ok) return;
+                      try {
+                        await eliminar(id);
+                      } catch (err) {
+                        console.error("Error al eliminar desde Sidebar:", err.message);
+                      }
+                    }}
                   />
                 ))}
               </div>
@@ -234,7 +234,7 @@ export default function Sidebar() {
 
       {/* Modal */}
       <Dialog open={modal} onOpenChange={setModal}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md" showCloseButton={false}>
           <DialogHeader>
             <DialogTitle>{editingId ? "✏️ Editar Recordatorio" : "➕ Nuevo Recordatorio"}</DialogTitle>
             <DialogDescription className="sr-only">Formulario para crear o editar recordatorio</DialogDescription>
