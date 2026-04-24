@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import Sidebar from "../components/Sidebar";
 import DevAccordion from "../components/DevAccordion";
 import DeployDrawer from "../components/DeployDrawer";
 import DeployNotificationModal from "../components/DeployNotificationModal";
@@ -53,12 +52,9 @@ export default function Dashboard() {
   }, [tickets]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-muted/30 font-sans">
-      {/* ── Sidebar izquierdo ── */}
-      <Sidebar />
-
-      {/* ── Área principal ── */}
+    <>
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+        {/* ── Área principal ── */}
         {/* Top bar */}
         <header className="bg-background border-b px-4 sm:px-6 py-3 flex flex-wrap items-center gap-x-4 gap-y-2 flex-shrink-0 shadow-sm">
           <div className="min-w-0 flex-1">
@@ -203,6 +199,6 @@ export default function Dashboard() {
         tickets={ticketChanges}
         onUpdateStatus={() => {}}
       />
-    </div>
+    </>
   );
 }

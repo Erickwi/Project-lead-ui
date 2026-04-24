@@ -115,7 +115,12 @@ function SortableItem({ rec, onEdit, onDelete }) {
   );
 }
 
-export default function Sidebar() {
+const NAV_ITEMS = [
+  { id: "dashboard", label: "📊 Dashboard", title: "Centro de Mando" },
+  { id: "reporte", label: "📈 Reporte", title: "Reporte de Versión" },
+];
+
+export default function Sidebar({ currentPage = "dashboard", onNavigate = () => {} }) {
   const { recordatorios, loading, crear, actualizar, eliminar, reorder } = useRecordatorios();
   const [modal, setModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -181,6 +186,23 @@ export default function Sidebar() {
   return (
     <>
       <aside className="w-72 flex-shrink-0 flex flex-col bg-zinc-950 h-screen overflow-hidden">
+        {/* Navegación principal */}
+        <nav className="px-3 pt-3 pb-2 border-b border-zinc-800 flex gap-1">
+          {NAV_ITEMS.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => onNavigate(item.id)}
+              title={item.title}
+              className={`flex-1 text-xs font-semibold py-1.5 px-2 rounded transition-colors ${
+                currentPage === item.id
+                  ? "bg-primary text-primary-foreground"
+                  : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+              }`}>
+              {item.label}
+            </button>
+          ))}
+        </nav>
+
         {/* Header */}
         <div className="px-4 py-4 border-b border-zinc-800 flex items-center justify-between">
           <h2 className="text-sm font-bold tracking-wider text-zinc-100 uppercase">📋 Notas & Recordatorios</h2>
