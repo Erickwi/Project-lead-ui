@@ -684,6 +684,311 @@ function QADevParidadSection({ timelineTickets }) {
   );
 }
 
+// ─── Sección: Horas Estimadas por Estado ────────────────────
+const HORAS_TARGET_DEVS = ["jerson", "fabio", "mateo", "jairo"];
+
+const HORAS_STATUS_GROUPS = [
+  {
+    key: "finalizados",
+    label: "Finalizados",
+    icon: "✅",
+    regex: /done|finaliz|complet|cerrado|terminado/i,
+    headerCls: "bg-green-50 border-green-200",
+    badgeCls: "bg-green-100 text-green-700 border-green-200",
+    barCls: "bg-green-500",
+  },
+  {
+    key: "ajustes",
+    label: "Ajustes",
+    icon: "🔧",
+    regex: /ajuste/i,
+    headerCls: "bg-orange-50 border-orange-200",
+    badgeCls: "bg-orange-100 text-orange-700 border-orange-200",
+    barCls: "bg-orange-500",
+  },
+  {
+    key: "desarrollo",
+    label: "En Desarrollo",
+    icon: "💻",
+    regex: /desarrollo|in progress|en progreso|doing|progreso/i,
+    headerCls: "bg-blue-50 border-blue-200",
+    badgeCls: "bg-blue-100 text-blue-700 border-blue-200",
+    barCls: "bg-blue-500",
+  },
+  {
+    key: "porHacer",
+    label: "Por Hacer",
+    icon: "📋",
+    regex: /to do|por hacer|backlog|abierto|sin iniciar|open/i,
+    headerCls: "bg-zinc-50 border-zinc-200",
+    badgeCls: "bg-zinc-100 text-zinc-600 border-zinc-200",
+    barCls: "bg-zinc-400",
+  },
+  {
+    key: "enPausa",
+    label: "En Pausa",
+    icon: "⏸️",
+    regex: /pausa|pausado|hold|bloqueado|blocked/i,
+    headerCls: "bg-yellow-50 border-yellow-200",
+    badgeCls: "bg-yellow-100 text-yellow-700 border-yellow-200",
+    barCls: "bg-yellow-500",
+  },
+];
+
+function HorasEstadoSection({ timelineTickets }) {
+  const [expandedGroup, setExpandedGroup] = useState(null);
+
+  // Filtrar solo tickets de los 4 devs objetivo
+  const devTickets = (timelineTickets || []).filter((t) => {
+    const devs = t.desarrolladores || [];
+    return devs.some((d) => HORAS_TARGET_DEVS.some((p) => (d || "").toLowerCase().includes(p)));
+  });
+
+  if (devTickets.length === 0) return null;
+
+  const totalEstimadoGlobal = devTickets.reduce((s, t) => s + (t.horas || 0), 0);
+
+  // Agrupar por categoría de estado
+  const grupos = HORAS_STATUS_GROUPS.map((sg) => {
+    const statusTickets = devTickets.filter((t) => sg.regex.test(t.status || ""));
+
+    const totalEstimado = Math.round(statusTickets.reduce((s, t) => s + (t.horas || 0), 0) * 10) / 10;
+    const totalRestante =
+      Math.round(
+        statusTickets.reduce((s, t) => s + (t.horasRestantes != null ? t.horasRestantes : t.horas || 0), 0) * 10,
+      ) / 10;
+
+    const perDev = HORAS_TARGET_DEVS.map((devPattern) => {
+      const dt = statusTickets.filter((t) =>
+        (t.desarrolladores || []).some((d) => (d || "").toLowerCase().includes(devPattern)),
+      );
+      const est = Math.round(dt.reduce((s, t) => s + (t.horas || 0), 0) * 10) / 10;
+      const rest =
+        Math.round(dt.reduce((s, t) => s + (t.horasRestantes != null ? t.horasRestantes : t.horas || 0), 0) * 10) / 10;
+      return { dev: devPattern, tickets: dt, estimado: est, restante: rest };
+    }).filter((d) => d.tickets.length > 0);
+
+    return { ...sg, tickets: statusTickets, totalEstimado, totalRestante, perDev };
+  }).filter((g) => g.tickets.length > 0);
+
+  return (
+    <Card className="border shadow-sm">
+      <CardHeader className="pb-3 border-b">
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <CardTitle className="text-base font-bold">⏱️ Horas Estimadas por Estado</CardTitle>
+            <p className="text-xs text-muted-foreground mt-1">
+              Tickets de {HORAS_TARGET_DEVS.join(", ")} — estimado vs. tiempo restante en Jira.
+            </p>
+          </div>
+          <div className="flex items-center gap-3 text-sm">
+            <span className="text-muted-foreground">Total tickets:</span>
+            <span className="font-bold">{devTickets.length}</span>
+            <span className="text-muted-foreground">Total estimado:</span>
+            <span className="font-bold text-primary">{Math.round(totalEstimadoGlobal * 10) / 10}h</span>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="px-4 pb-4 pt-4 space-y-3">
+        {/* Tabla resumen por estado */}
+        <div className="overflow-x-auto rounded-md border">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-muted/50 text-xs text-muted-foreground uppercase">
+                <th className="px-3 py-2 text-left font-medium">Estado</th>
+                <th className="px-3 py-2 text-center font-medium">Tickets</th>
+                {HORAS_TARGET_DEVS.map((d) => (
+                  <th key={d} className="px-3 py-2 text-center font-medium capitalize">
+                    {d}
+                  </th>
+                ))}
+                <th className="px-3 py-2 text-center font-medium">Total Est.</th>
+                <th className="px-3 py-2 text-center font-medium">Restante</th>
+                <th className="px-3 py-2 text-center font-medium">% Usado</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {grupos.map((g) => {
+                const pctUsado =
+                  g.totalEstimado > 0 ? Math.round(((g.totalEstimado - g.totalRestante) / g.totalEstimado) * 100) : 0;
+                return (
+                  <tr
+                    key={g.key}
+                    className="hover:bg-muted/30 cursor-pointer transition-colors"
+                    onClick={() => setExpandedGroup(expandedGroup === g.key ? null : g.key)}>
+                    <td className="px-3 py-2">
+                      <span
+                        className={`inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-full border font-medium ${g.badgeCls}`}>
+                        {g.icon} {g.label}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2 text-center font-semibold">{g.tickets.length}</td>
+                    {HORAS_TARGET_DEVS.map((devPattern) => {
+                      const dg = g.perDev.find((d) => d.dev === devPattern);
+                      return (
+                        <td key={devPattern} className="px-3 py-2 text-center">
+                          {dg ? (
+                            <div className="flex flex-col items-center leading-tight">
+                              <span className="font-semibold text-foreground">{dg.estimado}h</span>
+                              <span className="text-[10px] text-muted-foreground">
+                                {dg.restante < dg.estimado ? (
+                                  <span className="text-green-600">
+                                    −{Math.round((dg.estimado - dg.restante) * 10) / 10}h
+                                  </span>
+                                ) : (
+                                  <span className="text-muted-foreground/50">—</span>
+                                )}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground/30">—</span>
+                          )}
+                        </td>
+                      );
+                    })}
+                    <td className="px-3 py-2 text-center font-bold text-primary">{g.totalEstimado}h</td>
+                    <td className="px-3 py-2 text-center font-semibold">
+                      {g.totalRestante < g.totalEstimado ? (
+                        <span className="text-orange-600">{g.totalRestante}h</span>
+                      ) : (
+                        <span className="text-muted-foreground">{g.totalRestante}h</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2 text-center">
+                      <div className="flex items-center gap-1.5 justify-center">
+                        <div className="h-1.5 w-16 rounded-full bg-muted overflow-hidden">
+                          <div className={`h-full rounded-full ${g.barCls}`} style={{ width: `${pctUsado}%` }} />
+                        </div>
+                        <span className="text-xs text-muted-foreground">{pctUsado}%</span>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            <tfoot>
+              <tr className="bg-muted/30 font-semibold text-sm border-t-2">
+                <td className="px-3 py-2 text-muted-foreground uppercase text-xs">Total</td>
+                <td className="px-3 py-2 text-center">{devTickets.length}</td>
+                {HORAS_TARGET_DEVS.map((devPattern) => {
+                  const devTotal = devTickets.filter((t) =>
+                    (t.desarrolladores || []).some((d) => (d || "").toLowerCase().includes(devPattern)),
+                  );
+                  const est = Math.round(devTotal.reduce((s, t) => s + (t.horas || 0), 0) * 10) / 10;
+                  const rest =
+                    Math.round(
+                      devTotal.reduce((s, t) => s + (t.horasRestantes != null ? t.horasRestantes : t.horas || 0), 0) *
+                        10,
+                    ) / 10;
+                  return (
+                    <td key={devPattern} className="px-3 py-2 text-center">
+                      <div className="flex flex-col items-center leading-tight">
+                        <span className="font-bold">{est}h</span>
+                        <span className="text-[10px] text-orange-600">rest: {rest}h</span>
+                      </div>
+                    </td>
+                  );
+                })}
+                <td className="px-3 py-2 text-center text-primary font-bold">
+                  {Math.round(totalEstimadoGlobal * 10) / 10}h
+                </td>
+                <td className="px-3 py-2 text-center text-orange-600 font-bold">
+                  {Math.round(
+                    devTickets.reduce((s, t) => s + (t.horasRestantes != null ? t.horasRestantes : t.horas || 0), 0) *
+                      10,
+                  ) / 10}
+                  h
+                </td>
+                <td className="px-3 py-2" />
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        {/* Detalle expandible por grupo */}
+        {expandedGroup &&
+          (() => {
+            const g = grupos.find((x) => x.key === expandedGroup);
+            if (!g) return null;
+            return (
+              <div className={`rounded-md border p-3 ${g.headerCls} space-y-2`}>
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-sm">
+                    {g.icon} {g.label} — {g.tickets.length} ticket{g.tickets.length !== 1 ? "s" : ""}
+                  </span>
+                  <button
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                    onClick={() => setExpandedGroup(null)}>
+                    ✕ Cerrar
+                  </button>
+                </div>
+                <div className="overflow-x-auto rounded border bg-background">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="bg-muted/50 text-[10px] text-muted-foreground uppercase">
+                        <th className="px-2 py-1.5 text-left">Ticket</th>
+                        <th className="px-2 py-1.5 text-left">Resumen</th>
+                        <th className="px-2 py-1.5 text-left">Dev(s)</th>
+                        <th className="px-2 py-1.5 text-center">Estimado</th>
+                        <th className="px-2 py-1.5 text-center">Restante</th>
+                        <th className="px-2 py-1.5 text-center">Usado</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      {g.tickets.map((t) => {
+                        const usado = (t.horas || 0) - (t.horasRestantes != null ? t.horasRestantes : t.horas || 0);
+                        const pct = t.horas > 0 ? Math.round((usado / t.horas) * 100) : 0;
+                        const devsStr = (t.desarrolladores || [t.assignee]).join(", ");
+                        return (
+                          <tr key={t.key} className="hover:bg-muted/20">
+                            <td className="px-2 py-1.5 font-mono text-primary whitespace-nowrap">{t.key}</td>
+                            <td className="px-2 py-1.5 max-w-xs truncate text-foreground" title={t.summary}>
+                              {t.summary}
+                            </td>
+                            <td className="px-2 py-1.5 text-muted-foreground">{devsStr}</td>
+                            <td className="px-2 py-1.5 text-center font-semibold">{t.horas || 16}h</td>
+                            <td className="px-2 py-1.5 text-center">
+                              {t.horasRestantes != null ? (
+                                <span
+                                  className={
+                                    t.horasRestantes > 0
+                                      ? "text-orange-600 font-semibold"
+                                      : "text-green-600 font-semibold"
+                                  }>
+                                  {t.horasRestantes}h
+                                </span>
+                              ) : (
+                                <span className="text-muted-foreground/50">—</span>
+                              )}
+                            </td>
+                            <td className="px-2 py-1.5 text-center">
+                              {t.horasRestantes != null ? (
+                                <span className={pct >= 100 ? "text-green-600 font-bold" : "text-muted-foreground"}>
+                                  {pct}%
+                                </span>
+                              ) : (
+                                <span className="text-muted-foreground/50">—</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            );
+          })()}
+
+        <p className="text-xs text-muted-foreground">
+          Haz clic en una fila de estado para ver el detalle de tickets. <strong>Restante</strong> = tiempo pendiente
+          registrado en Jira.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
 // ─── Sección: Análisis de Rebotes QA por Ticket ─────────────
 function RebotesQASection({ timelineTickets }) {
   const tickets = (timelineTickets || [])
@@ -1110,7 +1415,7 @@ export default function ReporteVersion() {
         {/* Estado de carga inicial */}
         {loading && !datos && (
           <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
-            <div className="text-4xl mb-4 animate-spin">📊</div>
+            <div className="text-4xl mb-4 animate-pulse">📋</div>
             <p className="text-base font-medium">Analizando versión...</p>
             <p className="text-sm mt-1">Descargando tickets y historial de Jira</p>
           </div>
@@ -1185,6 +1490,9 @@ export default function ReporteVersion() {
 
             {/* ── Dev Stats ── */}
             <DevStatsSection devStats={datos.devStats} />
+
+            {/* ── Horas Estimadas por Estado ── */}
+            <HorasEstadoSection timelineTickets={datos.timelineTickets} />
 
             {/* ── QA Interno vs Operativo por Dev ── */}
             <QADevParidadSection timelineTickets={datos.timelineTickets} />

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useRecordatorios } from "../hooks/useRecordatorios";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +25,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { ChevronLeft, ChevronRight, LayoutDashboard, BarChart2, Plus } from "lucide-react";
 
 const PRIORITY_CFG = {
   Alta: { border: "border-l-red-500", badge: "bg-red-100 text-red-700 hover:bg-red-100", dot: "bg-red-500" },
@@ -69,32 +71,34 @@ function SortableItem({ rec, onEdit, onDelete }) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`bg-zinc-900 border-l-4 ${cfg.border} rounded-r-lg p-3 group transition-all hover:bg-zinc-800 ${isVerde ? "opacity-60" : ""}`}>
+      {...attributes}
+      {...listeners}
+      className={`bg-zinc-900 border-l-4 ${cfg.border} rounded-r-lg p-3 group transition-all hover:bg-zinc-800 cursor-grab active:cursor-grabbing touch-none ${isVerde ? "opacity-60" : ""}`}>
       <div className="flex items-start justify-between gap-2">
         <p className="text-sm text-zinc-100 flex-1 leading-snug break-words">{rec.descripcion}</p>
         <div className="flex gap-1 flex-shrink-0">
           <Button
             variant="ghost"
             size="icon"
+            onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => {
               e.stopPropagation();
-              console.debug("Sidebar edit clicked", rec.id);
               onEdit(rec);
             }}
             title="Editar"
-            className="h-6 w-6 text-zinc-400 hover:text-zinc-100 hover:bg-transparent">
+            className="h-6 w-6 text-zinc-400 hover:text-zinc-100 hover:bg-transparent cursor-pointer">
             ✏️
           </Button>
           <Button
             variant="ghost"
             size="icon"
+            onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => {
               e.stopPropagation();
-              console.debug("Sidebar delete clicked", rec.id);
               onDelete(rec.id);
             }}
             title="Eliminar"
-            className="h-6 w-6 text-zinc-400 hover:text-red-400 hover:bg-transparent">
+            className="h-6 w-6 text-zinc-400 hover:text-red-400 hover:bg-transparent cursor-pointer">
             🗑️
           </Button>
         </div>
@@ -120,11 +124,13 @@ const NAV_ITEMS = [
   { id: "reporte", label: "📈 Reporte", title: "Reporte de Versión" },
 ];
 
-export default function Sidebar({ currentPage = "dashboard", onNavigate = () => {} }) {
+export default function Sidebar({ currentPage = "dashboard" }) {
+  const navigate = useNavigate();
   const { recordatorios, loading, crear, actualizar, eliminar, reorder } = useRecordatorios();
   const [modal, setModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [collapsed, setCollapsed] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -185,74 +191,134 @@ export default function Sidebar({ currentPage = "dashboard", onNavigate = () => 
 
   return (
     <>
-      <aside className="w-72 flex-shrink-0 flex flex-col bg-zinc-950 h-screen overflow-hidden">
-        {/* Navegación principal */}
-        <nav className="px-3 pt-3 pb-2 border-b border-zinc-800 flex gap-1">
-          {NAV_ITEMS.map((item) => (
+      {/* ── Sidebar colapsado: strip vertical fino ── */}
+      {collapsed && (
+        <aside className="w-12 flex-shrink-0 flex flex-col items-center bg-zinc-950 h-screen border-r border-zinc-800 py-3 gap-3 z-10">
+          {/* Botón expandir */}
+          <button
+            onClick={() => setCollapsed(false)}
+            title="Mostrar panel"
+            className="w-8 h-8 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors">
+            <ChevronRight size={16} />
+          </button>
+
+          {/* Nav icons */}
+          <div className="flex flex-col gap-2 mt-1">
             <button
-              key={item.id}
-              onClick={() => onNavigate(item.id)}
-              title={item.title}
-              className={`flex-1 text-xs font-semibold py-1.5 px-2 rounded transition-colors ${
-                currentPage === item.id
+              onClick={() => navigate("/")}
+              title="Dashboard"
+              className={`w-8 h-8 flex items-center justify-center rounded-md transition-colors ${
+                currentPage === "dashboard"
                   ? "bg-primary text-primary-foreground"
-                  : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+                  : "text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800"
               }`}>
-              {item.label}
+              <LayoutDashboard size={15} />
             </button>
-          ))}
-        </nav>
+            <button
+              onClick={() => navigate("/reporte")}
+              title="Reporte"
+              className={`w-8 h-8 flex items-center justify-center rounded-md transition-colors ${
+                currentPage === "reporte"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800"
+              }`}>
+              <BarChart2 size={15} />
+            </button>
+          </div>
 
-        {/* Header */}
-        <div className="px-4 py-4 border-b border-zinc-800 flex items-center justify-between">
-          <h2 className="text-sm font-bold tracking-wider text-zinc-100 uppercase">📋 Notas & Recordatorios</h2>
-          <Button
-            size="sm"
-            onClick={openCreate}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold">
-            + Nuevo
-          </Button>
-        </div>
+          {/* Nueva nota (solo icono) */}
+          <div className="mt-auto mb-1">
+            <button
+              onClick={() => {
+                setCollapsed(false);
+                openCreate();
+              }}
+              title="Nueva nota"
+              className="w-8 h-8 flex items-center justify-center rounded-md text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800 transition-colors">
+              <Plus size={15} />
+            </button>
+          </div>
+        </aside>
+      )}
 
-        {/* Lista */}
-        <ScrollArea className="flex-1 p-3 overflow-y-auto">
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={sortedRecordatorios.map((r) => r.id)} strategy={verticalListSortingStrategy}>
-              <div className="space-y-2">
-                {loading && <p className="text-zinc-500 text-xs text-center mt-6">Cargando...</p>}
-                {!loading && recordatorios.length === 0 && (
-                  <p className="text-zinc-500 text-xs text-center mt-8 leading-relaxed">
-                    Sin recordatorios aún.
-                    <br />
-                    Crea el primero con el botón +
-                  </p>
-                )}
-                {sortedRecordatorios.map((rec) => (
-                  <SortableItem
-                    key={rec.id}
-                    rec={rec}
-                    onEdit={openEdit}
-                    onDelete={async (id) => {
-                      const ok = confirm("¿Estás seguro que quieres eliminar esta nota?");
-                      if (!ok) return;
-                      try {
-                        await eliminar(id);
-                      } catch (err) {
-                        console.error("Error al eliminar desde Sidebar:", err.message);
-                      }
-                    }}
-                  />
-                ))}
-              </div>
-            </SortableContext>
-          </DndContext>
-        </ScrollArea>
+      {/* ── Sidebar expandido ── */}
+      {!collapsed && (
+        <aside className="w-72 flex-shrink-0 flex flex-col bg-zinc-950 h-screen overflow-hidden">
+          {/* Navegación principal + botón colapsar */}
+          <nav className="px-3 pt-3 pb-2 border-b border-zinc-800 flex gap-1 items-center">
+            {NAV_ITEMS.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => navigate(item.id === "dashboard" ? "/" : `/${item.id}`)}
+                title={item.title}
+                className={`flex-1 text-xs font-semibold py-1.5 px-2 rounded transition-colors ${
+                  currentPage === item.id
+                    ? "bg-primary text-primary-foreground"
+                    : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+                }`}>
+                {item.label}
+              </button>
+            ))}
+            {/* Colapsar */}
+            <button
+              onClick={() => setCollapsed(true)}
+              title="Ocultar panel"
+              className="ml-1 w-7 h-7 flex items-center justify-center rounded text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800 transition-colors flex-shrink-0">
+              <ChevronLeft size={15} />
+            </button>
+          </nav>
 
-        {/* Footer version */}
-        <div className="px-4 py-3 border-t border-zinc-800">
-          <p className="text-xs text-zinc-600 text-center">Sprint v3.10.6.1 · Ecomex 360</p>
-        </div>
-      </aside>
+          {/* Header */}
+          <div className="px-4 py-4 border-b border-zinc-800 flex items-center justify-between">
+            <h2 className="text-sm font-bold tracking-wider text-zinc-100 uppercase">📋 Notas & Recordatorios</h2>
+            <Button
+              size="sm"
+              onClick={openCreate}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold">
+              + Nuevo
+            </Button>
+          </div>
+
+          {/* Lista */}
+          <ScrollArea className="flex-1 p-3 overflow-y-auto">
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={sortedRecordatorios.map((r) => r.id)} strategy={verticalListSortingStrategy}>
+                <div className="space-y-2">
+                  {loading && <p className="text-zinc-500 text-xs text-center mt-6">Cargando...</p>}
+                  {!loading && recordatorios.length === 0 && (
+                    <p className="text-zinc-500 text-xs text-center mt-8 leading-relaxed">
+                      Sin recordatorios aún.
+                      <br />
+                      Crea el primero con el botón +
+                    </p>
+                  )}
+                  {sortedRecordatorios.map((rec) => (
+                    <SortableItem
+                      key={rec.id}
+                      rec={rec}
+                      onEdit={openEdit}
+                      onDelete={async (id) => {
+                        const ok = confirm("¿Estás seguro que quieres eliminar esta nota?");
+                        if (!ok) return;
+                        try {
+                          await eliminar(id);
+                        } catch (err) {
+                          console.error("Error al eliminar desde Sidebar:", err.message);
+                        }
+                      }}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          </ScrollArea>
+
+          {/* Footer version */}
+          <div className="px-4 py-3 border-t border-zinc-800">
+            <p className="text-xs text-zinc-600 text-center">Sprint v3.10.6.1 · Ecomex 360</p>
+          </div>
+        </aside>
+      )}
 
       {/* Modal */}
       <Dialog open={modal} onOpenChange={setModal}>

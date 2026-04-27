@@ -133,7 +133,7 @@ export default function Dashboard() {
           {/* Estado de carga */}
           {loading && (
             <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
-              <div className="text-4xl mb-4 animate-spin">⚙️</div>
+              <div className="text-4xl mb-4 animate-pulse">📋</div>
               <p className="text-base font-medium">Conectando con Jira...</p>
               <p className="text-sm mt-1">Cargando tickets del sprint activo</p>
             </div>
