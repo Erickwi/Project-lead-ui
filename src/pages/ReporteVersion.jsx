@@ -1369,9 +1369,8 @@ function PausasSection({ pausas, crearPausa, eliminarPausa }) {
 export default function ReporteVersion() {
   const { datos, pausas, loading, error, fetchDatos, crearPausa, eliminarPausa } = useReporte();
 
-  useEffect(() => {
-    fetchDatos();
-  }, [fetchDatos]);
+  // fetchDatos is now handled inside useReporte on mount (cached)
+  // The useEffect below is removed to avoid double-fetch
 
   const t = datos?.totales || {};
   const maxKpi = Math.max(t.soloInterno || 0, t.soloOperativo || 0, t.ambosQA || 0, 1);
