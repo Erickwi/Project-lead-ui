@@ -2,6 +2,7 @@ import { useState } from "react";
 import { format, parseISO, isValid } from "date-fns";
 import { es } from "date-fns/locale";
 import TicketRow from "./TicketRow";
+import SprintAnalysisSection from "./SprintAnalysisSection";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -191,6 +192,9 @@ export default function DevAccordion({ tickets, doneTickets = [], onUpdate, onUp
           </Card>
         </section>
       )}
+
+      {/* ── ANÁLISIS DE VERSIONES (movidos + finalizados por sprint) ── */}
+      <SprintAnalysisSection />
     </div>
   );
 }

@@ -56,7 +56,7 @@ export default function Dashboard() {
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* ── Área principal ── */}
         {/* Top bar */}
-        <header className="bg-background border-b px-4 sm:px-6 py-3 flex flex-wrap items-center gap-x-4 gap-y-2 flex-shrink-0 shadow-sm">
+        <header className="bg-background border-b px-4 sm:px-6 py-3 flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-x-4 flex-shrink-0 shadow-sm">
           <div className="min-w-0 flex-1">
             <h1 className="text-base sm:text-xl font-bold tracking-tight leading-tight">
               📊 Centro de Mando — Project Lead

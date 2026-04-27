@@ -105,13 +105,61 @@ function useReporteState() {
   };
 }
 
+// ─── Sprint Analysis cache ────────────────────────────────────────────────────
+
+function useSprintAnalysisState() {
+  const [movedTickets, setMovedTickets] = useState([]);
+  const [done306, setDone306] = useState([]);
+  const [done307, setDone307] = useState([]);
+  const [configured, setConfigured] = useState({ moved: false, done306: false, done307: false });
+  const [queryErrors, setQueryErrors] = useState({ moved: null, done306: null, done307: null });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const hasFetched = useRef(false);
+
+  const fetchSprintAnalysis = useCallback(async (force = false) => {
+    if (hasFetched.current && !force) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await api.get("/tickets/sprint-analysis");
+      setMovedTickets(res.data.movedTickets || []);
+      setDone306(res.data.done306 || []);
+      setDone307(res.data.done307 || []);
+      setConfigured(res.data.configured || { moved: false, done306: false, done307: false });
+      setQueryErrors(res.data.errors || { moved: null, done306: null, done307: null });
+      hasFetched.current = true;
+    } catch (err) {
+      setError(err.response?.data?.error || err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return {
+    sprintMovedTickets: movedTickets,
+    sprintDone306: done306,
+    sprintDone307: done307,
+    sprintConfigured: configured,
+    sprintQueryErrors: queryErrors,
+    sprintAnalysisLoading: loading,
+    sprintAnalysisError: error,
+    fetchSprintAnalysis,
+  };
+}
+
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
 export function AppDataProvider({ children }) {
   const ticketsState = useTicketsState();
   const reporteState = useReporteState();
+  const sprintState = useSprintAnalysisState();
 
-  return <AppDataContext.Provider value={{ ...ticketsState, ...reporteState }}>{children}</AppDataContext.Provider>;
+  return (
+    <AppDataContext.Provider value={{ ...ticketsState, ...reporteState, ...sprintState }}>
+      {children}
+    </AppDataContext.Provider>
+  );
 }
 
 export function useAppData() {
