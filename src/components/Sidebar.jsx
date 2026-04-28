@@ -130,7 +130,14 @@ export default function Sidebar({ currentPage = "dashboard" }) {
   const [modal, setModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    return localStorage.getItem("sidebar-collapsed") === "true";
+  });
+
+  const toggleCollapsed = (value) => {
+    setCollapsed(value);
+    localStorage.setItem("sidebar-collapsed", value);
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -196,7 +203,7 @@ export default function Sidebar({ currentPage = "dashboard" }) {
         <aside className="w-12 flex-shrink-0 flex flex-col items-center bg-zinc-950 h-screen border-r border-zinc-800 py-3 gap-3 z-10">
           {/* Botón expandir */}
           <button
-            onClick={() => setCollapsed(false)}
+            onClick={() => toggleCollapsed(false)}
             title="Mostrar panel"
             className="w-8 h-8 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors">
             <ChevronRight size={16} />
@@ -230,7 +237,7 @@ export default function Sidebar({ currentPage = "dashboard" }) {
           <div className="mt-auto mb-1">
             <button
               onClick={() => {
-                setCollapsed(false);
+                toggleCollapsed(false);
                 openCreate();
               }}
               title="Nueva nota"
@@ -261,7 +268,7 @@ export default function Sidebar({ currentPage = "dashboard" }) {
             ))}
             {/* Colapsar */}
             <button
-              onClick={() => setCollapsed(true)}
+              onClick={() => toggleCollapsed(true)}
               title="Ocultar panel"
               className="ml-1 w-7 h-7 flex items-center justify-center rounded text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800 transition-colors flex-shrink-0">
               <ChevronLeft size={15} />
