@@ -1365,6 +1365,591 @@ function PausasSection({ pausas, crearPausa, eliminarPausa }) {
   );
 }
 
+// ─── Helpers de color por tipo de ticket ────────────────────
+function tipoColor(tipo) {
+  const t = (tipo || "").toLowerCase();
+  if (/bug|error|defecto/.test(t))        return { bar: "bg-red-400",    badge: "bg-red-50 text-red-700 border-red-300",       border: "border-red-200" };
+  if (/mejora|improvement|story/.test(t)) return { bar: "bg-cyan-400",   badge: "bg-cyan-50 text-cyan-700 border-cyan-300",     border: "border-cyan-200" };
+  if (/task|tarea/.test(t))               return { bar: "bg-amber-400",  badge: "bg-amber-50 text-amber-700 border-amber-300",  border: "border-amber-200" };
+  if (/epic/.test(t))                     return { bar: "bg-purple-400", badge: "bg-purple-50 text-purple-700 border-purple-300", border: "border-purple-200" };
+  return { bar: "bg-zinc-400", badge: "bg-zinc-100 text-zinc-600 border-zinc-300", border: "border-zinc-200" };
+}
+
+const MODULE_COLORS = [
+  "bg-indigo-400","bg-teal-400","bg-orange-400","bg-pink-400",
+  "bg-lime-500","bg-sky-400","bg-violet-400","bg-rose-400",
+  "bg-emerald-400","bg-fuchsia-400",
+];
+
+// ─── Sub-componente: tabla de tipos reutilizable ─────────────
+function TipoTabla({ tiposData, totalUniverso, modColorMap, labelTotal }) {
+  const [expandido, setExpandido] = useState(null);
+  const tiposEntries = Object.entries(tiposData || {});
+  if (tiposEntries.length === 0) return <p className="text-xs text-muted-foreground">Sin datos</p>;
+  const maxTotal = tiposEntries[0]?.[1]?.total || 1;
+
+  return (
+    <div className="space-y-3">
+      {/* chips resumen */}
+      <div className="flex flex-wrap gap-2">
+        {tiposEntries.map(([tipo, d]) => {
+          const c = tipoColor(tipo);
+          return (
+            <button
+              key={tipo}
+              onClick={() => setExpandido(expandido === tipo ? null : tipo)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold transition-all ${
+                expandido === tipo ? c.badge + " ring-2 ring-offset-1 ring-current" : c.badge + " hover:opacity-80"
+              }`}
+            >
+              {tipo}
+              <span className="font-extrabold">{d.total}</span>
+              <span className="opacity-60">· {d.porcentaje}%</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* tabla */}
+      <div className="rounded-lg border overflow-hidden">
+        <table className="w-full text-xs">
+          <thead className="bg-muted/50">
+            <tr>
+              <th className="text-left px-3 py-2 font-medium text-muted-foreground">Tipo</th>
+              <th className="text-center px-3 py-2 font-medium text-muted-foreground">Total</th>
+              <th className="text-center px-3 py-2 font-medium text-muted-foreground">% de {labelTotal}</th>
+              <th className="text-left px-3 py-2 font-medium text-muted-foreground w-32">Barra</th>
+              <th className="text-left px-3 py-2 font-medium text-muted-foreground">Módulos principales</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            {tiposEntries.map(([tipo, d]) => {
+              const c = tipoColor(tipo);
+              const topMods = Object.entries(d.modulos).slice(0, 4);
+              const barW = maxTotal > 0 ? Math.round((d.total / maxTotal) * 100) : 0;
+              return (
+                <tr key={tipo} className="hover:bg-muted/30 cursor-pointer" onClick={() => setExpandido(expandido === tipo ? null : tipo)}>
+                  <td className="px-3 py-2 font-semibold">
+                    <span className={`px-2 py-0.5 rounded-full border text-xs font-semibold ${c.badge}`}>{tipo}</span>
+                  </td>
+                  <td className="px-3 py-2 text-center text-xl font-extrabold">{d.total}</td>
+                  <td className="px-3 py-2 text-center font-bold">{d.porcentaje}%</td>
+                  <td className="px-3 py-2">
+                    <div className="bg-muted rounded-full h-3 overflow-hidden">
+                      <div className={`h-full rounded-full ${c.bar} transition-all`} style={{ width: `${barW}%` }} />
+                    </div>
+                  </td>
+                  <td className="px-3 py-2">
+                    <div className="flex flex-wrap gap-1">
+                      {topMods.map(([mod, mdata]) => (
+                        <span key={mod} className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium text-white ${modColorMap[mod] || "bg-zinc-400"}`}>
+                          {mod} ({mdata.count})
+                        </span>
+                      ))}
+                      {Object.keys(d.modulos).length > 4 && (
+                        <span className="text-[10px] text-muted-foreground">+{Object.keys(d.modulos).length - 4} más</span>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+          <tfoot className="bg-muted/30 border-t">
+            <tr>
+              <td className="px-3 py-1.5 text-xs font-semibold text-muted-foreground">TOTAL</td>
+              <td className="px-3 py-1.5 text-center text-sm font-extrabold">{totalUniverso}</td>
+              <td className="px-3 py-1.5 text-center text-xs text-muted-foreground">100%</td>
+              <td /><td />
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      {/* detalle expandido */}
+      {expandido && tiposData[expandido] && (() => {
+        const d = tiposData[expandido];
+        const c = tipoColor(expandido);
+        const modsEntries = Object.entries(d.modulos);
+        const maxMod = modsEntries[0]?.[1]?.count || 1;
+        return (
+          <div className={`rounded-xl border p-4 space-y-3 ${c.border}`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className={`px-2 py-0.5 rounded-full border text-xs font-semibold ${c.badge}`}>{expandido}</span>
+                <span className="text-sm font-bold">{d.total} tickets · {d.porcentaje}% de {labelTotal}</span>
+              </div>
+              <button onClick={() => setExpandido(null)} className="text-xs text-muted-foreground hover:text-foreground">✕</button>
+            </div>
+
+            {/* barras por módulo */}
+            <div className="space-y-1.5">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Desglose por módulo</p>
+              {modsEntries.map(([mod, mdata]) => (
+                <div key={mod} className="flex items-center gap-3 text-xs">
+                  <span className="w-28 truncate text-right flex-shrink-0 text-muted-foreground">{mod}</span>
+                  <div className="flex-1 bg-muted rounded-full h-5 overflow-hidden relative">
+                    <div
+                      className={`h-full rounded-full transition-all ${modColorMap[mod] || "bg-zinc-400"}`}
+                      style={{ width: `${Math.round((mdata.count / maxMod) * 100)}%`, minWidth: "2rem" }}
+                    />
+                    <span className="absolute inset-0 flex items-center pl-2 text-[10px] font-bold text-white">
+                      {mdata.count} · {mdata.porcentajeTipo}% del tipo
+                    </span>
+                  </div>
+                  <span className="w-6 text-right font-extrabold flex-shrink-0">{mdata.count}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* lista de tickets */}
+            <details>
+              <summary className="text-xs text-muted-foreground hover:text-foreground cursor-pointer select-none">
+                Ver los {d.total} tickets ▶
+              </summary>
+              <div className="mt-2 rounded-lg border overflow-hidden">
+                <table className="w-full text-xs">
+                  <thead className="bg-muted/40">
+                    <tr>
+                      <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Ticket</th>
+                      <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Módulo</th>
+                      <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Dev</th>
+                      <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Estado</th>
+                      <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Resumen</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {modsEntries.flatMap(([mod, mdata]) =>
+                      mdata.tickets.map((tk) => (
+                        <tr key={tk.key} className="hover:bg-muted/30">
+                          <td className="px-3 py-1.5 font-mono font-semibold text-primary">{tk.key}</td>
+                          <td className="px-3 py-1.5">
+                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium text-white ${modColorMap[mod] || "bg-zinc-400"}`}>{mod}</span>
+                          </td>
+                          <td className="px-3 py-1.5 text-muted-foreground max-w-[110px] truncate">{tk.assignee}</td>
+                          <td className="px-3 py-1.5">
+                            <Badge variant="outline" className={`text-xs ${statusColor(tk.status)}`}>{tk.status}</Badge>
+                          </td>
+                          <td className="px-3 py-1.5 text-muted-foreground max-w-[200px] truncate">{tk.summary}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </details>
+          </div>
+        );
+      })()}
+    </div>
+  );
+}
+
+// ─── Sección: Clasificación por Tipo y Módulo ───────────────
+function ModuloPorTipoSection({ moduloStats }) {
+  const [vista, setVista] = useState("todos"); // "todos" | "finalizados"
+
+  if (!moduloStats) return null;
+
+  const { tipos = {}, tiposFinalizado = {}, totalTickets = 0, totalFinalizado = 0 } = moduloStats;
+
+  // mapa de colores de módulos usando el universo completo
+  const allMods = Array.from(new Set([
+    ...Object.values(tipos).flatMap(d => Object.keys(d.modulos)),
+    ...Object.values(tiposFinalizado).flatMap(d => Object.keys(d.modulos)),
+  ]));
+  const modColorMap = Object.fromEntries(allMods.map((m, i) => [m, MODULE_COLORS[i % MODULE_COLORS.length]]));
+
+  const isFinalizados = vista === "finalizados";
+  const tiposActivos  = isFinalizados ? tiposFinalizado : tipos;
+  const universo      = isFinalizados ? totalFinalizado : totalTickets;
+  const labelTotal    = isFinalizados ? `${totalFinalizado} finalizados` : `${totalTickets} del sprint`;
+
+  // ── Generador de texto narrativo ──────────────────────────
+  function generarParrafos(tiposData, total, scope) {
+    if (!total || Object.keys(tiposData).length === 0) return [];
+    const entries = Object.entries(tiposData).sort((a, b) => b[1].total - a[1].total);
+    const parrafos = [];
+
+    // Párrafo 1 — resumen general
+    const resumenTipos = entries
+      .map(([tipo, d]) => `**${tipo}** (${d.total} ticket${d.total !== 1 ? "s" : ""}, ${d.porcentaje}%)`)
+      .join(", ");
+    parrafos.push(`En ${scope} se registran **${total} tickets** en total, distribuidos entre los siguientes tipos: ${resumenTipos}.`);
+
+    // Párrafo 2 — tipo predominante
+    const [tipoPrincipal, dprincipal] = entries[0];
+    const topModsPrincipal = Object.entries(dprincipal.modulos)
+      .slice(0, 3)
+      .map(([mod, m]) => `${mod} (${m.count})`)
+      .join(", ");
+    parrafos.push(`El tipo de ticket más frecuente es **${tipoPrincipal}** con **${dprincipal.total} tickets** (${dprincipal.porcentaje}% ${scope}), concentrado principalmente en los módulos: ${topModsPrincipal}.`);
+
+    // Párrafo por cada tipo adicional
+    for (const [tipo, d] of entries.slice(1)) {
+      const topMods = Object.entries(d.modulos)
+        .slice(0, 3)
+        .map(([mod, m]) => `${mod} (${m.count})`)
+        .join(", ");
+      const moduloStr = topMods ? `, distribuyéndose en los módulos ${topMods}` : "";
+      parrafos.push(`**${tipo}** representa **${d.total} ticket${d.total !== 1 ? "s" : ""}** (${d.porcentaje}% ${scope})${moduloStr}.`);
+    }
+
+    // Párrafo final — módulo con más incidencia global
+    const moduloAcum = {};
+    for (const [, d] of entries) {
+      for (const [mod, m] of Object.entries(d.modulos)) {
+        moduloAcum[mod] = (moduloAcum[mod] || 0) + m.count;
+      }
+    }
+    const modulosSorted = Object.entries(moduloAcum).sort((a, b) => b[1] - a[1]);
+    if (modulosSorted.length > 0) {
+      const [modTop, cntTop] = modulosSorted[0];
+      const pctMod = total > 0 ? Math.round((cntTop / total) * 1000) / 10 : 0;
+      parrafos.push(`Considerando todos los tipos, el módulo con mayor carga de trabajo es **${modTop}** con **${cntTop} ticket${cntTop !== 1 ? "s" : ""}** (${pctMod}% de ${scope}).`);
+    }
+
+    return parrafos;
+  }
+
+  const parrafos = generarParrafos(
+    tiposActivos,
+    universo,
+    isFinalizados ? "los tickets finalizados" : "el sprint"
+  );
+
+  return (
+    <Card>
+      <CardHeader className="pb-3 pt-4 px-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div>
+            <CardTitle className="text-sm font-semibold">📦 Tickets por Tipo y Módulo</CardTitle>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Clasificación según el tipo de trabajo (Bug, Mejoras, etc.) y el módulo del sistema afectado.
+            </p>
+          </div>
+          {/* toggle tabs */}
+          <div className="flex rounded-lg border overflow-hidden text-xs font-semibold flex-shrink-0">
+            <button
+              onClick={() => setVista("todos")}
+              className={`px-4 py-1.5 transition-colors ${
+                !isFinalizados ? "bg-primary text-primary-foreground" : "hover:bg-muted text-muted-foreground"
+              }`}
+            >
+              🗂 Todos ({totalTickets})
+            </button>
+            <button
+              onClick={() => setVista("finalizados")}
+              className={`px-4 py-1.5 transition-colors border-l ${
+                isFinalizados ? "bg-emerald-600 text-white" : "hover:bg-muted text-muted-foreground"
+              }`}
+            >
+              ✅ Finalizados ({totalFinalizado})
+            </button>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="px-4 pb-5 space-y-5">
+        {/* gráfico / tabla */}
+        <TipoTabla
+          key={vista}
+          tiposData={tiposActivos}
+          totalUniverso={universo}
+          modColorMap={modColorMap}
+          labelTotal={labelTotal}
+        />
+
+        {/* ── Análisis narrativo ── */}
+        {parrafos.length > 0 && (
+          <div className="rounded-xl border bg-muted/30 px-5 py-4 space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <span>📝</span> Análisis en texto
+            </p>
+            {parrafos.map((p, i) => (
+              <p key={i} className="text-sm text-foreground leading-relaxed">
+                {p.split(/\*\*(.+?)\*\*/g).map((part, j) =>
+                  j % 2 === 1
+                    ? <strong key={j} className="font-semibold text-foreground">{part}</strong>
+                    : part
+                )}
+              </p>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── Helpers de redacción por tipo ──────────────────────────
+function verboTipo(tipo) {
+  const t = (tipo || "").toLowerCase();
+  if (/bug|error|defecto/.test(t))        return { accion: "se corrigieron",  nombre: "correcciones",  icono: "🐛" };
+  if (/mejora|improvement|story/.test(t)) return { accion: "se implementaron", nombre: "mejoras",       icono: "✨" };
+  if (/task|tarea/.test(t))               return { accion: "se completaron",   nombre: "tareas",        icono: "✅" };
+  if (/epic/.test(t))                     return { accion: "se cerraron",      nombre: "épicas",        icono: "🏔" };
+  return { accion: "se resolvieron", nombre: "tickets", icono: "🎫" };
+}
+
+// ─── Sección: Release Notes detallado ───────────────────────
+
+/**
+ * Extrae el contenido de una sección específica del texto Jira convertido de ADF.
+ * Busca la línea que contenga alguna de las keywords y retorna el texto que le sigue
+ * hasta el próximo separador (---) o encabezado (###).
+ */
+function extractSection(texto, keywords) {
+  if (!texto) return null;
+  const lines = texto.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    const hit = keywords.some((kw) => new RegExp(kw, 'i').test(lines[i]));
+    if (!hit) continue;
+    const content = [];
+    for (let j = i + 1; j < lines.length; j++) {
+      if (/^-{3,}$/.test(lines[j].trim()) || /^#{1,3}\s/.test(lines[j])) break;
+      const cleaned = lines[j].replace(/^\s*(?:[*>-]|\d+\.)\s*/, '').trim();
+      if (cleaned) content.push(cleaned);
+    }
+    const result = content.join(' ').trim();
+    if (result.length > 20) return result;
+  }
+  return null;
+}
+
+function truncarTexto(texto, max = 500) {
+  if (!texto || texto.length <= max) return texto;
+  const cut = texto.lastIndexOf(' ', max);
+  return texto.slice(0, cut > 0 ? cut : max) + '\u2026';
+}
+
+// Patrones de texto de plantilla vacía que Jira pone por defecto y no aportan información
+const TEMPLATE_PLACEHOLDERS = [
+  /^describir los pasos/i,
+  /^redacci[oó]n minuciosa/i,
+  /^describir los pasos actuales/i,
+  /^paso 1\s*paso 2/i,
+  /^1\.\s*paso 1/i,
+];
+function isPlaceholder(texto) {
+  if (!texto) return true;
+  return TEMPLATE_PLACEHOLDERS.some((re) => re.test(texto.trim()));
+}
+
+/**
+ * Genera la oración de resolución ("¿Qué se resolvió?") para un ticket.
+ * Prioridad 1: sección "✅ Comportamiento esperado" de la descripción real en Jira.
+ * Fallback: texto genérico según tipo de ticket.
+ */
+function generarResolucion(tk, tipo, modulo) {
+  const tl = tipo.toLowerCase();
+  const s = tk.summary || "";
+
+  // Extraer sección "Comportamiento esperado" de la descripción Jira
+  const esperado = extractSection(tk.descripcion, [
+    'Comportamiento esperado del sistema',
+    'Comportamiento esperado',
+  ]);
+  if (esperado && esperado.length > 30 && !isPlaceholder(esperado)) {
+    return truncarTexto(esperado, 600);
+  }
+
+  if (/bug|error|defecto/.test(tl)) {
+    return `Se corrigió el problema en el módulo ${modulo}: "${s}". A partir de esta versión el sistema opera correctamente en este flujo y el inconveniente reportado queda resuelto.`;
+  }
+  if (/mejora|improvement|story/.test(tl)) {
+    return `Se implementó satisfactoriamente la mejora "${s}" en el módulo ${modulo}. El sistema ahora cuenta con esta funcionalidad, brindando mayor precisión y una mejor experiencia al usuario.`;
+  }
+  if (/task|tarea/.test(tl)) {
+    return `Se completó la tarea "${s}" correspondiente al módulo ${modulo}. Los ajustes realizados quedan integrados y disponibles en esta versión.`;
+  }
+  return `El cambio "${s}" en el módulo ${modulo} fue integrado exitosamente en esta versión.`;
+}
+
+function ReleaseNotesSection({ moduloStats }) {
+  const [expandedTipo, setExpandedTipo] = useState(null);
+
+  if (!moduloStats) return null;
+
+  const { tiposFinalizado = {}, totalFinalizado = 0 } = moduloStats;
+  const tiposEntries = Object.entries(tiposFinalizado).sort((a, b) => b[1].total - a[1].total);
+
+  if (tiposEntries.length === 0 || totalFinalizado === 0) return null;
+
+  const resumen = tiposEntries
+    .map(([tipo, d]) => {
+      const v = verboTipo(tipo);
+      return `${d.total} ${d.total === 1 ? tipo.toLowerCase().replace(/s$/, "") : v.nombre}`;
+    })
+    .join(", ");
+
+  // Trunca texto largo sin cortar palabras a mitad
+  function truncar(texto, max = 350) {
+    if (!texto || texto.length <= max) return texto;
+    const cut = texto.lastIndexOf(" ", max);
+    return texto.slice(0, cut > 0 ? cut : max) + "…";
+  }
+
+  return (
+    <Card>
+      <CardHeader className="pb-3 pt-4 px-4">
+        <CardTitle className="text-sm font-semibold">📋 Release Notes — Cambios de esta Versión</CardTitle>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          Detalle de los{" "}
+          <strong className="text-foreground">{totalFinalizado} tickets finalizados</strong>:{" "}
+          qué problema existía y qué se resolvió en esta versión.
+        </p>
+      </CardHeader>
+      <CardContent className="px-4 pb-5 space-y-4">
+
+        {/* ── Párrafo de introducción ── */}
+        <div className="rounded-xl border bg-muted/30 px-5 py-4 text-sm leading-relaxed text-foreground">
+          <p>
+            En la versión actual del sprint se completaron en total{" "}
+            <strong>{totalFinalizado} tickets</strong>: {resumen}.
+            Cada cambio se documenta con la situación anterior y lo que se entregó resuelto.
+          </p>
+        </div>
+
+        {/* ── Un bloque colapsable por tipo ── */}
+        {tiposEntries.map(([tipo, d]) => {
+          const v = verboTipo(tipo);
+          const c = tipoColor(tipo);
+          const modsEntries = Object.entries(d.modulos).sort((a, b) => b[1].count - a[1].count);
+          const isOpen = expandedTipo === tipo;
+          const listaModulos = modsEntries.map(([mod, m]) => `${mod} (${m.count})`).join(", ");
+
+          return (
+            <div key={tipo} className={`rounded-xl border overflow-hidden ${c.border}`}>
+
+              {/* Cabecera clicable */}
+              <button
+                className="w-full flex items-center justify-between px-5 py-3 text-left hover:bg-muted/30 transition-colors"
+                onClick={() => setExpandedTipo(isOpen ? null : tipo)}
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-base">{v.icono}</span>
+                  <span className={`px-2 py-0.5 rounded-full border text-xs font-semibold flex-shrink-0 ${c.badge}`}>{tipo}</span>
+                  <span className="text-sm font-bold">{d.total} ticket{d.total !== 1 ? "s" : ""}</span>
+                  <span className="text-xs text-muted-foreground">· {d.porcentaje}% del sprint finalizados</span>
+                </div>
+                <span className="text-muted-foreground text-xs flex-shrink-0 ml-2">{isOpen ? "▲ cerrar" : "▼ ver detalle"}</span>
+              </button>
+
+              {/* Contenido expandido */}
+              {isOpen && (
+                <div className="border-t px-5 py-4 space-y-6 bg-background">
+
+                  {/* Resumen del tipo */}
+                  <p className="text-sm leading-relaxed text-foreground">
+                    En este sprint {v.accion}{" "}
+                    <strong>{d.total} {v.nombre}</strong> distribuidos en{" "}
+                    <strong>{modsEntries.length} módulo{modsEntries.length !== 1 ? "s" : ""}</strong>:{" "}
+                    {listaModulos}.
+                  </p>
+
+                  {/* Sub-bloque por módulo */}
+                  {modsEntries.map(([mod, mdata]) => {
+                    const tickets = mdata.tickets;
+                    const conteo = tickets.length;
+                    const accionMod = (() => {
+                      const tl = tipo.toLowerCase();
+                      if (/bug|error|defecto/.test(tl))
+                        return conteo === 1 ? "se detectó y corrigió 1 error" : `se detectaron y corrigieron ${conteo} errores`;
+                      if (/mejora|improvement|story/.test(tl))
+                        return conteo === 1 ? "se implementó 1 mejora" : `se implementaron ${conteo} mejoras`;
+                      return conteo === 1 ? "se completó 1 tarea" : `se completaron ${conteo} tareas`;
+                    })();
+
+                    return (
+                      <div key={mod} className="space-y-3">
+                        {/* Encabezado del módulo */}
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${c.bar}`} />
+                          <span className="text-sm font-bold text-foreground">Módulo: {mod}</span>
+                          <span className="text-xs text-muted-foreground">— {accionMod}.</span>
+                        </div>
+
+                        {/* Tarjetas antes/ahora por ticket */}
+                        <div className="space-y-4 pl-3 border-l-2 border-muted">
+                          {tickets.map((tk) => {
+                            // Extraer sección "Comportamiento actual" para mostrar como situación previa.
+                            // Fallback: descripción completa truncada.
+                            const situacion = extractSection(tk.descripcion, [
+                              'Comportamiento actual del sistema',
+                              'Comportamiento actual',
+                              'Antecedente o Contexto',
+                              'Antecedente',
+                            ]);
+                            const desc = situacion
+                              ? truncarTexto(situacion, 500)
+                              : truncar(tk.descripcion);
+                            const resolucion = generarResolucion(tk, tipo, mod);
+                            return (
+                              <div key={tk.key} className="rounded-lg border overflow-hidden text-sm">
+
+                                {/* Ref discreta en el header */}
+                                <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/30 border-b">
+                                  <span className="font-mono text-[11px] text-muted-foreground">{tk.key}</span>
+                                  <span className="text-muted-foreground/40 text-xs">·</span>
+                                  <span className="text-xs text-muted-foreground truncate">{tk.summary}</span>
+                                  <Badge variant="outline" className={`text-[10px] ml-auto flex-shrink-0 ${statusColor(tk.status)}`}>
+                                    {tk.status}
+                                  </Badge>
+                                </div>
+
+                                {/* ANTES — descripción del problema (texto del ticket Jira) */}
+                                <div className="px-3 py-2.5 border-b border-l-4 border-l-amber-400 bg-amber-50/5">
+                                  <p className="text-[11px] font-semibold text-amber-600 uppercase tracking-wide mb-1">
+                                    Situación anterior
+                                  </p>
+                                  {desc ? (
+                                    <p className="leading-relaxed text-foreground">{desc}</p>
+                                  ) : (
+                                    <p className="leading-relaxed italic text-muted-foreground">
+                                      Sin descripción registrada en Jira para este ticket.
+                                    </p>
+                                  )}
+                                </div>
+
+                                {/* AHORA — resolución generada */}
+                                <div className="px-3 py-2.5 border-l-4 border-l-emerald-500 bg-emerald-50/5">
+                                  <p className="text-[11px] font-semibold text-emerald-600 uppercase tracking-wide mb-1">
+                                    ¿Qué se resolvió?
+                                  </p>
+                                  <p className="leading-relaxed text-foreground">{resolucion}</p>
+                                </div>
+
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* Cierre del módulo */}
+                        {conteo > 1 && (
+                          <p className="text-xs text-muted-foreground leading-relaxed">
+                            Los {conteo} cambios en <strong>{mod}</strong> representan el{" "}
+                            <strong>{mdata.porcentajeTipo}%</strong> del total de {v.nombre} de esta versión.
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  {/* Cierre del tipo */}
+                  <p className="text-xs text-muted-foreground italic border-t pt-3">
+                    Las {d.total} {v.nombre} de tipo <strong>{tipo}</strong> representan el{" "}
+                    <strong>{d.porcentaje}%</strong> del total de tickets finalizados.
+                  </p>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </CardContent>
+    </Card>
+  );
+}
+
 // ─── Página principal ────────────────────────────────────────
 export default function ReporteVersion() {
   const { datos, pausas, loading, error, fetchDatos, crearPausa, eliminarPausa } = useReporte();
@@ -1374,6 +1959,7 @@ export default function ReporteVersion() {
 
   const t = datos?.totales || {};
   const maxKpi = Math.max(t.soloInterno || 0, t.soloOperativo || 0, t.ambosQA || 0, 1);
+  const qaSum = (t.soloInterno || 0) + (t.soloOperativo || 0) + (t.ambosQA || 0) + (t.sinQA || 0);
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden min-w-0">
@@ -1440,46 +2026,107 @@ export default function ReporteVersion() {
         {datos && (
           <>
             {/* ── KPI Cards ── */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-              <KpiCard
-                icon="🎫"
-                label="Total Tickets"
-                value={t.total || 0}
-                sub={`${t.activos || 0} activos · ${t.finalizados || 0} finalizados`}
-                color="border-l-primary"
-              />
-              <KpiCard
-                icon="🔵"
-                label="Solo QA Interno"
-                value={t.soloInterno || 0}
-                sub="Sin revisión operativa"
-                color="border-l-blue-400"
-              />
-              <KpiCard
-                icon="🟣"
-                label="Solo QA Operativo"
-                value={t.soloOperativo || 0}
-                sub="Sin revisión interna"
-                color="border-l-purple-400"
-              />
-              <KpiCard
-                icon="✅"
-                label="Ambos QA"
-                value={t.ambosQA || 0}
-                sub="Interno + Operativo"
-                color="border-l-green-400"
-              />
-              <KpiCard
-                icon="✔️"
-                label="Finalizados"
-                value={t.finalizados || 0}
-                sub={`${t.total ? Math.round((t.finalizados / t.total) * 100) : 0}% del total`}
-                color="border-l-emerald-500"
-              />
+            <div className="space-y-3">
+
+              {/* ── Fila 1: Total → Desglose QA ── */}
+              <div className="flex flex-col lg:flex-row items-stretch gap-2">
+
+                {/* Total Tickets */}
+                <Card className="border-l-4 border-l-primary lg:w-48 flex-shrink-0">
+                  <CardContent className="pt-4 pb-3 px-4">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">🎫 Total Tickets</p>
+                    <p className="text-3xl font-extrabold mt-1">{t.total || 0}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{t.activos || 0} activos · {t.finalizados || 0} finalizados</p>
+                  </CardContent>
+                </Card>
+
+                {/* Conector → desktop */}
+                <div className="hidden lg:flex flex-col items-center justify-center gap-1 text-muted-foreground/60 px-0.5 flex-shrink-0">
+                  <span className="text-[9px] font-medium text-center leading-tight">divide<br/>en</span>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                  </svg>
+                </div>
+
+                {/* Conector ↓ mobile */}
+                <div className="flex lg:hidden items-center justify-center gap-1.5 text-muted-foreground text-xs py-0.5">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 5v14"/><path d="m5 12 7 7 7-7"/>
+                  </svg>
+                  <span>distribución por cobertura QA</span>
+                </div>
+
+                {/* QA Breakdown */}
+                <div className="flex-1 min-w-0 rounded-xl border border-dashed border-zinc-300 dark:border-zinc-600 p-3 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Cobertura de QA por ticket</span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                      qaSum === (t.total || 0)
+                        ? 'text-green-700 border-green-300 bg-green-50 dark:bg-green-950/40 dark:border-green-700 dark:text-green-300'
+                        : 'text-orange-700 border-orange-300 bg-orange-50'
+                    }`}>
+                      {qaSum} / {t.total || 0} {qaSum === (t.total || 0) ? '✓' : '⚠'}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <KpiCard icon="🔵" label="Solo QA Interno" value={t.soloInterno || 0} sub="Sin rev. operativa" color="border-l-blue-400" />
+                    <KpiCard icon="🟣" label="Solo QA Operativo" value={t.soloOperativo || 0} sub="Sin rev. interna" color="border-l-purple-400" />
+                    <KpiCard icon="✅" label="Ambos QA" value={t.ambosQA || 0} sub="Interno + Operativo" color="border-l-green-400" />
+                    <KpiCard icon="⬜" label="Sin QA" value={t.sinQA || 0} sub="Sin revisor asignado" color="border-l-zinc-400" />
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Fila 2: Total → Finalizados ── */}
+              <div className="flex flex-col lg:flex-row items-start gap-2">
+
+                {/* Espaciador — mismo ancho que la card Total */}
+                <div className="hidden lg:block lg:w-48 flex-shrink-0" aria-hidden="true" />
+
+                {/* Conector ↗ desktop */}
+                <div className="hidden lg:flex flex-col items-center justify-start gap-1 text-muted-foreground/60 px-0.5 flex-shrink-0 pt-3">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                  </svg>
+                  <span className="text-[9px] font-medium text-center leading-tight">avance<br/>sprint</span>
+                </div>
+
+                {/* Conector ↓ mobile */}
+                <div className="flex lg:hidden items-center justify-center gap-1.5 text-muted-foreground text-xs py-0.5">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 5v14"/><path d="m5 12 7 7 7-7"/>
+                  </svg>
+                  <span>avance del sprint</span>
+                </div>
+
+                {/* Finalizados */}
+                <div className="rounded-xl border border-dashed border-emerald-300 dark:border-emerald-700 bg-emerald-50/30 dark:bg-emerald-950/20 p-3 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                  <KpiCard
+                    icon="✔️"
+                    label="Finalizados"
+                    value={t.finalizados || 0}
+                    sub={`${t.total ? Math.round((t.finalizados / t.total) * 100) : 0}% del total`}
+                    color="border-l-emerald-500"
+                  />
+                  <div className="flex items-baseline gap-1.5 pl-1 text-sm text-muted-foreground">
+                    <span className="text-2xl font-extrabold text-emerald-600">{t.finalizados || 0}</span>
+                    <span>de</span>
+                    <span className="text-2xl font-extrabold text-foreground">{t.total || 0}</span>
+                    <span>tickets totales</span>
+                  </div>
+                </div>
+              </div>
+
             </div>
 
             {/* ── Distribución de estados ── */}
             <StatusDistribucion statusCounts={datos.statusCounts} />
+
+            {/* ── Clasificación por Tipo y Módulo ── */}
+            <ModuloPorTipoSection moduloStats={datos.moduloStats} />
+
+            {/* ── Release Notes detallado ── */}
+            <ReleaseNotesSection moduloStats={datos.moduloStats} />
 
             {/* ── QA Breakdown ── */}
             <QABreakdownSection qaBreakdown={datos.qaBreakdown} />
