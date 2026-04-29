@@ -22,7 +22,8 @@ export function useRecordatorios() {
   const crear = async (rec) => {
     const { data } = await api.post('/recordatorios', rec);
     const newRec = data.recordatorio || data;
-    setRecordatorios(prev => [...prev, newRec]);
+    // poner la nueva nota al inicio
+    setRecordatorios(prev => [newRec, ...prev]);
   };
 
   const actualizar = async (id, rec) => {

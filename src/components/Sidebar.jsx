@@ -75,7 +75,11 @@ function SortableItem({ rec, onEdit, onDelete }) {
       {...listeners}
       className={`bg-zinc-900 border-l-4 ${cfg.border} rounded-r-lg p-3 group transition-all hover:bg-zinc-800 cursor-grab active:cursor-grabbing touch-none ${isVerde ? "opacity-60" : ""}`}>
       <div className="flex items-start justify-between gap-2">
-        <p className="text-sm text-zinc-100 flex-1 leading-snug break-words">{rec.descripcion}</p>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm text-zinc-100 leading-snug break-all whitespace-pre-wrap max-h-20 overflow-auto">
+            {rec.descripcion}
+          </p>
+        </div>
         <div className="flex gap-1 flex-shrink-0">
           <Button
             variant="ghost"
@@ -344,6 +348,7 @@ export default function Sidebar({ currentPage = "dashboard" }) {
                 id="descripcion"
                 required
                 rows={3}
+                autosize
                 placeholder="Describe la tarea o nota importante..."
                 value={form.descripcion}
                 onChange={(e) => setForm((f) => ({ ...f, descripcion: e.target.value }))}
