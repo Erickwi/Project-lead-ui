@@ -6,6 +6,7 @@ import ServerUpdateModal from "../components/ServerUpdateModal";
 import { useTickets } from "../hooks/useTickets";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Dashboard() {
   const { tickets, doneTickets, loading, error, refetch, updateTicketInfo, updateDeployStatus } = useTickets();
@@ -130,12 +131,42 @@ export default function Dashboard() {
 
         {/* Contenido scrollable */}
         <main className="flex-1 overflow-y-auto px-6 py-5">
-          {/* Estado de carga */}
+          {/* Estado de carga: Skeleton */}
           {loading && (
-            <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
-              <div className="text-4xl mb-4 animate-pulse">📋</div>
-              <p className="text-base font-medium">Conectando con Jira...</p>
-              <p className="text-sm mt-1">Cargando tickets del sprint activo</p>
+            <div className="space-y-4">
+              {/* Header skeleton */}
+              <div className="space-y-2">
+                <Skeleton className="h-7 w-72" />
+                <Skeleton className="h-4 w-96" />
+              </div>
+
+              {/* Stats bars */}
+              <div className="flex flex-wrap gap-3">
+                <Skeleton className="h-7 w-24 rounded-full" />
+                <Skeleton className="h-7 w-32 rounded-full" />
+              </div>
+
+              {/* Dev cards skeleton */}
+              <div className="space-y-3 mt-6">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="border rounded-lg overflow-hidden">
+                    <div className="flex items-center gap-3 px-4 py-3 bg-muted/30">
+                      <Skeleton className="h-8 w-8 rounded-full" />
+                      <Skeleton className="h-5 w-32" />
+                      <Skeleton className="h-5 w-16 ml-auto rounded-full" />
+                    </div>
+                    <div className="px-4 py-3 space-y-2">
+                      {[1, 2, 3].map((j) => (
+                        <div key={j} className="flex items-center gap-3">
+                          <Skeleton className="h-4 w-20" />
+                          <Skeleton className="h-4 flex-1" />
+                          <Skeleton className="h-5 w-16 rounded-full" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 

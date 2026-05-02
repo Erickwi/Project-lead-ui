@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
@@ -297,7 +298,20 @@ export default function Sidebar({ currentPage = "dashboard" }) {
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={sortedRecordatorios.map((r) => r.id)} strategy={verticalListSortingStrategy}>
                 <div className="space-y-2">
-                  {loading && <p className="text-zinc-500 text-xs text-center mt-6">Cargando...</p>}
+                  {loading && (
+                    <div className="space-y-2 mt-2">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="bg-zinc-900 border-l-4 border-l-zinc-700 rounded-r-lg p-3 space-y-2">
+                      <Skeleton className="h-3 w-full bg-zinc-800/50" />
+                      <Skeleton className="h-3 w-3/4 bg-zinc-800/50" />
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="h-4 w-14 rounded-full bg-zinc-800/50" />
+                        <Skeleton className="h-3 w-16 bg-zinc-800/50" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                  )}
                   {!loading && recordatorios.length === 0 && (
                     <p className="text-zinc-500 text-xs text-center mt-8 leading-relaxed">
                       Sin recordatorios aún.

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAppData } from "../context/AppDataContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function TicketRowSimple({ t }) {
   return (
@@ -27,7 +28,7 @@ function TicketRowSimple({ t }) {
 }
 
 export default function FinalizadosPorFecha() {
-  const { fetchSprintAnalysis, sprintDone306Grouped, sprintDone307Grouped } = useAppData();
+  const { fetchSprintAnalysis, sprintDone306Grouped, sprintDone307Grouped, sprintAnalysisLoading } = useAppData();
   const [expandedMonth, setExpandedMonth] = useState({});
   const [expandedDate, setExpandedDate] = useState({});
 
@@ -66,6 +67,30 @@ export default function FinalizadosPorFecha() {
 
   const RenderGroups = ({ title, groups }) => {
     const months = groupByMonth(groups);
+    if (sprintAnalysisLoading) {
+      return (
+        <section className="mb-6">
+          <h3 className="text-sm font-semibold mb-3">{title}</h3>
+          <div className="space-y-3">
+            <Card className="p-3">
+              <Skeleton className="h-5 w-1/3 bg-slate-200 dark:bg-zinc-700 mb-3" />
+              <div className="space-y-2">
+                <Skeleton className="h-12 bg-slate-200 dark:bg-zinc-700" />
+                <Skeleton className="h-12 bg-slate-200 dark:bg-zinc-700" />
+              </div>
+            </Card>
+            <Card className="p-3">
+              <Skeleton className="h-5 w-1/3 bg-slate-200 dark:bg-zinc-700 mb-3" />
+              <div className="space-y-2">
+                <Skeleton className="h-12 bg-slate-200 dark:bg-zinc-700" />
+                <Skeleton className="h-12 bg-slate-200 dark:bg-zinc-700" />
+              </div>
+            </Card>
+          </div>
+        </section>
+      );
+    }
+
     return (
       <section className="mb-6">
         <h3 className="text-sm font-semibold mb-3">{title}</h3>
