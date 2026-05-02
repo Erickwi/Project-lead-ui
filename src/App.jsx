@@ -5,6 +5,7 @@ import ReporteVersion from "./pages/ReporteVersion";
 import FinalizadosPorFecha from "./pages/FinalizadosPorFecha";
 import Sidebar from "./components/Sidebar";
 import { AppDataProvider } from "./context/AppDataContext";
+import { TooltipProvider } from "./components/ui/tooltip";
 
 export default function App() {
   const location = useLocation();
@@ -13,18 +14,20 @@ export default function App() {
 
   return (
     <AppDataProvider>
-      <div className="flex h-screen overflow-hidden bg-muted/30 font-sans">
-        <Sidebar currentPage={currentPage} />
-        <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/reporte" element={<ReporteVersion />} />
-            <Route path="/finalizados" element={<FinalizadosPorFecha />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+      <TooltipProvider>
+        <div className="flex h-screen overflow-hidden bg-muted/30 font-sans">
+          <Sidebar currentPage={currentPage} />
+          <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/reporte" element={<ReporteVersion />} />
+              <Route path="/finalizados" element={<FinalizadosPorFecha />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </div>
         </div>
-      </div>
+      </TooltipProvider>
     </AppDataProvider>
   );
 }
