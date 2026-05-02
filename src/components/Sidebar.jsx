@@ -130,20 +130,12 @@ const NAV_ITEMS = [
   { id: "finalizados", label: "📦 Finalizados", title: "Finalizados por Fecha" },
 ];
 
-export default function Sidebar({ currentPage = "dashboard" }) {
+export default function Sidebar({ currentPage = "dashboard", collapsed, onToggleCollapsed, onCloseMobile }) {
   const navigate = useNavigate();
   const { recordatorios, loading, crear, actualizar, eliminar, reorder } = useRecordatorios();
   const [modal, setModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
-  const [collapsed, setCollapsed] = useState(() => {
-    return localStorage.getItem("sidebar-collapsed") === "true";
-  });
-
-  const toggleCollapsed = (value) => {
-    setCollapsed(value);
-    localStorage.setItem("sidebar-collapsed", value);
-  };
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -189,6 +181,11 @@ export default function Sidebar({ currentPage = "dashboard" }) {
     setModal(true);
   };
 
+  const handleNavigate = (path) => {
+    navigate(path);
+    if (onCloseMobile) onCloseMobile();
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -207,46 +204,46 @@ export default function Sidebar({ currentPage = "dashboard" }) {
     <>
       {/* ── Sidebar colapsado: strip vertical fino ── */}
       {collapsed && (
-        <aside className="w-12 flex-shrink-0 flex flex-col items-center bg-zinc-950 h-screen border-r border-zinc-800 py-3 gap-3 z-10">
+        <aside className="w-full flex-shrink-0 flex flex-col items-center bg-zinc-950 h-screen border-r border-zinc-800 py-3 gap-3 z-10">
           {/* Botón expandir */}
           <button
-            onClick={() => toggleCollapsed(false)}
-            title="Mostrar panel"
+             onClick={() => onToggleCollapsed(false)}
+             title="Mostrar panel"
             className="w-8 h-8 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors">
             <ChevronRight size={16} />
           </button>
 
-          {/* Nav icons */}
-          <div className="flex flex-col gap-2 mt-1">
-            <button
-              onClick={() => navigate("/")}
-              title="Dashboard"
-              className={`w-8 h-8 flex items-center justify-center rounded-md transition-colors ${
-                currentPage === "dashboard"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800"
-              }`}>
-              <LayoutDashboard size={15} />
-            </button>
-            <button
-              onClick={() => navigate("/reporte")}
-              title="Reporte"
-              className={`w-8 h-8 flex items-center justify-center rounded-md transition-colors ${
-                currentPage === "reporte"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800"
-              }`}>
-              <BarChart2 size={15} />
-            </button>
-          </div>
+           {/* Nav icons */}
+           <div className="flex flex-col gap-2 mt-1">
+             <button
+               onClick={() => handleNavigate("/")}
+               title="Dashboard"
+               className={`w-8 h-8 flex items-center justify-center rounded-md transition-colors ${
+                 currentPage === "dashboard"
+                   ? "bg-primary text-primary-foreground"
+                   : "text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800"
+               }`}>
+               <LayoutDashboard size={15} />
+             </button>
+             <button
+               onClick={() => handleNavigate("/reporte")}
+               title="Reporte"
+               className={`w-8 h-8 flex items-center justify-center rounded-md transition-colors ${
+                 currentPage === "reporte"
+                   ? "bg-primary text-primary-foreground"
+                   : "text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800"
+               }`}>
+               <BarChart2 size={15} />
+             </button>
+           </div>
 
           {/* Nueva nota (solo icono) */}
           <div className="mt-auto mb-1">
             <button
               onClick={() => {
-                toggleCollapsed(false);
-                openCreate();
-              }}
+                 onToggleCollapsed(false);
+                 openCreate();
+               }}
               title="Nueva nota"
               className="w-8 h-8 flex items-center justify-center rounded-md text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800 transition-colors">
               <Plus size={15} />
@@ -257,25 +254,25 @@ export default function Sidebar({ currentPage = "dashboard" }) {
 
       {/* ── Sidebar expandido ── */}
       {!collapsed && (
-        <aside className="w-72 flex-shrink-0 flex flex-col bg-zinc-950 h-screen overflow-hidden">
+        <aside className="w-full flex-shrink-0 flex flex-col bg-zinc-950 h-screen overflow-hidden">
           {/* Navegación principal + botón colapsar */}
           <nav className="px-3 pt-3 pb-2 border-b border-zinc-800 flex gap-1 items-center">
-            {NAV_ITEMS.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => navigate(item.id === "dashboard" ? "/" : `/${item.id}`)}
-                title={item.title}
-                className={`flex-1 text-xs font-semibold py-1.5 px-2 rounded transition-colors ${
-                  currentPage === item.id
-                    ? "bg-primary text-primary-foreground"
-                    : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
-                }`}>
-                {item.label}
-              </button>
-            ))}
+           {NAV_ITEMS.map((item) => (
+               <button
+                 key={item.id}
+                 onClick={() => handleNavigate(item.id === "dashboard" ? "/" : `/${item.id}`)}
+                 title={item.title}
+                 className={`flex-1 text-xs font-semibold py-1.5 px-2 rounded transition-colors ${
+                   currentPage === item.id
+                     ? "bg-primary text-primary-foreground"
+                     : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+                 }`}>
+                 {item.label}
+               </button>
+             ))}
             {/* Colapsar */}
             <button
-              onClick={() => toggleCollapsed(true)}
+              onClick={() => onToggleCollapsed(true)}
               title="Ocultar panel"
               className="ml-1 w-7 h-7 flex items-center justify-center rounded text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800 transition-colors flex-shrink-0">
               <ChevronLeft size={15} />

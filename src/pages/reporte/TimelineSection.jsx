@@ -36,8 +36,8 @@ export default function TimelineSection({ timelineTickets }) {
           onChange={(e) => setFiltro(e.target.value)}
           className="mb-3 h-8 text-xs"
         />
-        <div className="rounded-lg border overflow-auto max-h-96">
-          <table className="w-full text-xs whitespace-nowrap">
+         <div className="rounded-lg border overflow-x-auto max-h-96">
+           <table className="w-full text-xs whitespace-nowrap min-w-[800px]">
             <thead className="bg-background sticky top-0 z-20 shadow-sm">
               <tr>
                 <th className="text-left px-3 py-2 font-medium text-muted-foreground sticky left-0 bg-background z-30">

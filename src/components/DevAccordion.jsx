@@ -48,10 +48,12 @@ function DevCard({ nombre, tickets, onUpdate }) {
 
       {open && (
         <CardContent className="p-0 border-t animate-in fade-in-0 slide-in-from-top-1 duration-150">
-          <div className="divide-y">
-            {sorted.map((t) => (
-              <TicketRow key={t.key} ticket={t} onUpdate={onUpdate} />
-            ))}
+          <div className="overflow-x-auto">
+            <div className="divide-y min-w-[700px]">
+              {sorted.map((t) => (
+                <TicketRow key={t.key} ticket={t} onUpdate={onUpdate} />
+              ))}
+            </div>
           </div>
         </CardContent>
       )}
@@ -147,7 +149,8 @@ export default function DevAccordion({ tickets, doneTickets = [], onUpdate, onUp
           </div>
 
           <Card className="overflow-hidden shadow-sm">
-            <div className="divide-y">
+            <div className="overflow-x-auto">
+              <div className="divide-y min-w-[700px]">
               {doneTickets.map((t) => (
                 <div key={t.key} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors">
                   {/* Status icon */}
@@ -188,6 +191,7 @@ export default function DevAccordion({ tickets, doneTickets = [], onUpdate, onUp
                   {deployStatusBadge(t.deploy_status)}
                 </div>
               ))}
+              </div>
             </div>
           </Card>
         </section>

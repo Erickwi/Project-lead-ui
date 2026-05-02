@@ -18,9 +18,9 @@ export default function QABreakdownSection({ qaBreakdown }) {
             {items.length}
           </Badge>
         </button>
-        {open && (
-          <div className="rounded-lg border overflow-hidden">
-            <table className="w-full text-xs">
+         {open && (
+           <div className="rounded-lg border overflow-x-auto">
+             <table className="w-full text-xs min-w-[640px]">
               <thead className="bg-muted/50">
                 <tr>
                   <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Ticket</th>

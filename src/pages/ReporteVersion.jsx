@@ -99,7 +99,7 @@ export default function ReporteVersion() {
 
   return (
     <div className="flex-1 overflow-y-auto">
-      <div className="space-y-6 p-6">
+      <div className="space-y-6 p-3 sm:p-6">
         <div className="flex flex-col lg:flex-row items-stretch gap-2">
           <Card className="border-l-4 border-l-primary lg:w-48 flex-shrink-0">
             <CardContent className="pt-4 pb-3 px-4">

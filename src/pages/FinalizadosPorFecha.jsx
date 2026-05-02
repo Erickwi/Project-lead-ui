@@ -150,7 +150,7 @@ export default function FinalizadosPorFecha() {
   };
 
   return (
-    <div className="p-6 overflow-y-auto">
+    <div className="p-3 sm:p-6 overflow-y-auto">
       <h2 className="text-lg font-bold mb-4">Finalizados por fecha</h2>
       <RenderGroups title="Finalizados — 3.10.6 Stable" groups={sprintDone306Grouped} />
       <RenderGroups title="Finalizados — 3.10.7" groups={sprintDone307Grouped} />

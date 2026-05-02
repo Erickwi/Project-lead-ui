@@ -17,9 +17,11 @@ body,
     padding: 0;
 }
 
-/* Scrollbar personalizado para el sidebar y drawer */
+/* Scrollbar personalizado para el sidebar y drawer (más delgado y acorde a la paleta) */
+/* vertical width and horizontal height */
 ::-webkit-scrollbar {
-    width: 5px;
+    width: 4px;
+    height: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -27,12 +29,19 @@ body,
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #334155;
-    border-radius: 4px;
+    background: var(--primary);
+    border-radius: 9999px;
+    min-height: 24px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #475569;
+    background: color-mix(in srgb, var(--primary) 75%, black 25%);
+}
+
+/* Firefox: thinner scrollbars and themed color */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) transparent;
 }
 
 @layer base {
@@ -122,5 +131,28 @@ body,
 
     html {
         font-family: 'Geist Variable', sans-serif;
+    }
+
+    /* Mobile responsive improvements */
+    @media (max-width: 640px) {
+        .container {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+    }
+
+    /* Ensure tables don't break layout */
+    table {
+        min-width: 100%;
+    }
+
+    /* Better touch targets on mobile */
+    @media (max-width: 768px) {
+
+        button,
+        a {
+            min-height: 36px;
+            min-width: 36px;
+        }
     }
 }

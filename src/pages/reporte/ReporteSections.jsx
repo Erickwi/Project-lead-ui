@@ -168,20 +168,20 @@ export function QADevParidadSection({ timelineTickets }) {
                 </div>
               </div>
 
-              <div className="rounded border overflow-hidden mt-1">
-                <table className="w-full text-xs">
-                  <thead className="bg-muted/40">
-                    <tr>
-                      <th className="text-left px-2 py-1 font-medium text-muted-foreground">Ticket</th>
-                      <th className="text-center px-2 py-1 font-medium text-muted-foreground">Dev(s)</th>
-                      <th className="text-center px-2 py-1 font-medium text-muted-foreground">Categoría</th>
-                      <th className="text-center px-2 py-1 font-medium text-blue-600">Int.</th>
-                      <th className="text-center px-2 py-1 font-medium text-muted-foreground">Rev. Int.</th>
-                      <th className="text-center px-2 py-1 font-medium text-purple-600">Op.</th>
-                      <th className="text-center px-2 py-1 font-medium text-muted-foreground">Rev. Op.</th>
-                      <th className="text-center px-2 py-1 font-medium text-muted-foreground">Dif.</th>
-                    </tr>
-                  </thead>
+               <div className="rounded border overflow-hidden mt-1 overflow-x-auto">
+                 <table className="w-full text-xs min-w-[640px]">
+                   <thead className="bg-muted/40">
+                     <tr>
+                       <th className="text-left px-2 py-1 font-medium text-muted-foreground">Ticket</th>
+                       <th className="text-center px-2 py-1 font-medium text-muted-foreground">Dev(s)</th>
+                       <th className="text-center px-2 py-1 font-medium text-muted-foreground">Categoría</th>
+                       <th className="text-center px-2 py-1 font-medium text-blue-600">Int.</th>
+                       <th className="text-center px-2 py-1 font-medium text-muted-foreground">Rev. Int.</th>
+                       <th className="text-center px-2 py-1 font-medium text-purple-600">Op.</th>
+                       <th className="text-center px-2 py-1 font-medium text-muted-foreground">Rev. Op.</th>
+                       <th className="text-center px-2 py-1 font-medium text-muted-foreground">Dif.</th>
+                     </tr>
+                   </thead>
                   <tbody className="divide-y">
                     {sortedTickets.map((t) => {
                       const rInt = t.contadorQAInterno ?? 0;
@@ -315,8 +315,8 @@ export function HorasEstadoSection({ timelineTickets }) {
         </div>
       </CardHeader>
       <CardContent className="px-4 pb-4 pt-4 space-y-3">
-        <div className="overflow-x-auto rounded-md border">
-          <table className="w-full text-sm">
+         <div className="overflow-x-auto rounded-md border">
+           <table className="w-full text-sm min-w-[800px]">
             <thead>
               <tr className="bg-muted/50 text-xs text-muted-foreground uppercase">
                 <th className="px-3 py-2 text-left font-medium">Estado</th>
@@ -445,8 +445,8 @@ export function HorasEstadoSection({ timelineTickets }) {
                     ✕ Cerrar
                   </button>
                 </div>
-                <div className="overflow-x-auto rounded border bg-background">
-                  <table className="w-full text-xs">
+                 <div className="overflow-x-auto rounded border bg-background">
+                   <table className="w-full text-xs min-w-[640px]">
                     <thead>
                       <tr className="bg-muted/50 text-[10px] text-muted-foreground uppercase">
                         <th className="px-2 py-1.5 text-left">Ticket</th>
@@ -633,17 +633,17 @@ function TipoTabla({ tiposData, totalUniverso, modColorMap, labelTotal }) {
         })}
       </div>
 
-      <div className="rounded-lg border overflow-hidden">
-        <table className="w-full text-xs">
-          <thead className="bg-muted/50">
-            <tr>
-              <th className="text-left px-3 py-2 font-medium text-muted-foreground">Tipo</th>
-              <th className="text-center px-3 py-2 font-medium text-muted-foreground">Total</th>
-              <th className="text-center px-3 py-2 font-medium text-muted-foreground">% de {labelTotal}</th>
-              <th className="text-left px-3 py-2 font-medium text-muted-foreground w-32">Barra</th>
-              <th className="text-left px-3 py-2 font-medium text-muted-foreground">Módulos principales</th>
-            </tr>
-          </thead>
+               <div className="rounded-lg border overflow-hidden overflow-x-auto">
+         <table className="w-full text-xs min-w-[640px]">
+           <thead className="bg-muted/50">
+             <tr>
+               <th className="text-left px-3 py-2 font-medium text-muted-foreground">Tipo</th>
+               <th className="text-center px-3 py-2 font-medium text-muted-foreground">Total</th>
+               <th className="text-center px-3 py-2 font-medium text-muted-foreground">% de {labelTotal}</th>
+               <th className="text-left px-3 py-2 font-medium text-muted-foreground w-32">Barra</th>
+               <th className="text-left px-3 py-2 font-medium text-muted-foreground">Módulos principales</th>
+             </tr>
+           </thead>
           <tbody className="divide-y">
             {tiposEntries.map(([tipo, d]) => {
               const c = tipoColor(tipo);
@@ -742,21 +742,21 @@ function TipoTabla({ tiposData, totalUniverso, modColorMap, labelTotal }) {
                 ))}
               </div>
 
-              <details>
-                <summary className="text-xs text-muted-foreground hover:text-foreground cursor-pointer select-none">
-                  Ver los {d.total} tickets ▶
-                </summary>
-                <div className="mt-2 rounded-lg border overflow-hidden">
-                  <table className="w-full text-xs">
-                    <thead className="bg-muted/40">
-                      <tr>
-                        <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Ticket</th>
-                        <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Módulo</th>
-                        <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Dev</th>
-                        <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Estado</th>
-                        <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Resumen</th>
-                      </tr>
-                    </thead>
+               <details>
+                 <summary className="text-xs text-muted-foreground hover:text-foreground cursor-pointer select-none">
+                   Ver los {d.total} tickets ▶
+                 </summary>
+                 <div className="mt-2 rounded-lg border overflow-hidden overflow-x-auto">
+                   <table className="w-full text-xs min-w-[640px]">
+                     <thead className="bg-muted/40">
+                       <tr>
+                         <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Ticket</th>
+                         <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Módulo</th>
+                         <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Dev</th>
+                         <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Estado</th>
+                         <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Resumen</th>
+                       </tr>
+                     </thead>
                     <tbody className="divide-y">
                       {modsEntries.flatMap(([mod, mdata]) =>
                         mdata.tickets.map((tk) => (

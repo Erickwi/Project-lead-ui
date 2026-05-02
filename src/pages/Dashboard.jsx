@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function Dashboard() {
+import { PanelLeftOpen } from "lucide-react";
+
+export default function Dashboard({ sidebarOpen, setSidebarOpen }) {
   const { tickets, doneTickets, loading, error, refetch, updateTicketInfo, updateDeployStatus } = useTickets();
   const [drawerOpen, setDrawerOpen] = useState(false);
   // Release Notes removed per UX request
@@ -59,9 +61,20 @@ export default function Dashboard() {
         {/* Top bar */}
         <header className="bg-background border-b px-4 sm:px-6 py-3 flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-x-4 flex-shrink-0 shadow-sm">
           <div className="min-w-0 flex-1">
-            <h1 className="text-base sm:text-xl font-bold tracking-tight leading-tight">
-              📊 Centro de Mando — Project Lead
-            </h1>
+            <div className="flex items-center">
+              {/* Mobile toggle: show to the left of the title on small screens and only when sidebar is closed */}
+              {!sidebarOpen && (
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  aria-label="Abrir panel"
+                  className="mr-3 lg:hidden h-8 w-8 bg-primary/10 hover:bg-primary/20 text-primary rounded-md shadow-sm ring-1 ring-primary/25 flex items-center justify-center">
+                  <PanelLeftOpen size={16} />
+                </button>
+              )}
+              <h1 className="text-base sm:text-xl font-bold tracking-tight leading-tight flex items-center">
+                📊 Centro de Mando — Project Lead
+              </h1>
+            </div>
             <p className="text-xs text-muted-foreground mt-0.5 truncate">
               Sprint: Versión 3.10.6.1 stable · Proyecto Ecomex 360
             </p>
@@ -130,7 +143,7 @@ export default function Dashboard() {
         </header>
 
         {/* Contenido scrollable */}
-        <main className="flex-1 overflow-y-auto px-6 py-5">
+        <main className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 sm:py-5">
           {/* Estado de carga: Skeleton */}
           {loading && (
             <div className="space-y-4">
