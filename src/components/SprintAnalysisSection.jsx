@@ -128,6 +128,103 @@ function CollapsibleBlock({ title, icon, tickets, tag, emptyMsg, badgeClass, que
   );
 }
 
+function DoneByDateBlock({ title, grouped, emptyMsg }) {
+  if (!grouped || grouped.length === 0) {
+    return (
+      <div className="mb-5">
+        <div className="font-semibold text-sm mb-2">{title}</div>
+        <div className="px-4 py-6 text-center text-sm text-muted-foreground">{emptyMsg}</div>
+      </div>
+    );
+  }
+
+  // agrupar por mes
+  const months = {};
+  for (const g of grouped) {
+    const date = g.date;
+    if (!date || date === "Sin fecha") {
+      months["Sin fecha"] = months["Sin fecha"] || { label: "Sin fecha", dates: [] };
+      months["Sin fecha"].dates.push(g);
+      continue;
+    }
+    const d = new Date(date + "T00:00:00");
+    if (isNaN(d)) {
+      months["Sin fecha"] = months["Sin fecha"] || { label: "Sin fecha", dates: [] };
+      months["Sin fecha"].dates.push(g);
+      continue;
+    }
+    const monthKey = d.toISOString().slice(0, 7);
+    const label = new Intl.DateTimeFormat("es-ES", { month: "long", year: "numeric" }).format(d);
+    months[monthKey] = months[monthKey] || { label: label.charAt(0).toUpperCase() + label.slice(1), dates: [] };
+    months[monthKey].dates.push(g);
+  }
+
+  const monthList = Object.entries(months)
+    .map(([k, v]) => ({ key: k, label: v.label, dates: v.dates.sort((a, b) => b.date.localeCompare(a.date)) }))
+    .sort((a, b) => b.key.localeCompare(a.key));
+
+  const [openMonths, setOpenMonths] = useState({});
+  const [openDates, setOpenDates] = useState({});
+
+  const toggleMonth = (k) => setOpenMonths((s) => ({ ...s, [k]: !s[k] }));
+  const toggleDate = (d) => setOpenDates((s) => ({ ...s, [d]: !s[d] }));
+
+  return (
+    <div className="mb-5">
+      <div className="font-semibold text-sm mb-2">{title}</div>
+      <div className="space-y-4">
+        {monthList.map((m) => (
+          <div key={m.key}>
+            <Card className="mb-2 p-0">
+              <div className="flex items-center justify-between px-4 py-2 bg-muted/10">
+                <div className="text-sm font-medium">{m.label}</div>
+                <Button size="sm" variant="ghost" onClick={() => toggleMonth(m.key)}>
+                  {openMonths[m.key] ? "Ocultar" : `Ver (${m.dates.reduce((s, d) => s + d.items.length, 0)})`}
+                </Button>
+              </div>
+              {openMonths[m.key] && (
+                <CardContent className="p-0">
+                  <div className="space-y-2">
+                    {m.dates.map((g) => (
+                      <Card key={g.date} className="p-0">
+                        <div className="flex items-center justify-between px-4 py-2 bg-muted/20">
+                          <div className="text-xs font-medium">{g.date}</div>
+                          <Button size="sm" variant="ghost" onClick={() => toggleDate(g.date)}>
+                            {openDates[g.date] ? "Ocultar" : `Ver (${g.items.length})`}
+                          </Button>
+                        </div>
+                        {openDates[g.date] && (
+                          <CardContent className="p-0">
+                            <div className="divide-y">
+                              {g.items.map((t) => (
+                                <div key={t.key}>
+                                  <SprintTicketRow ticket={t} tag="done" />
+                                  {t.doneChange && (
+                                    <div className="px-6 pb-3 text-xs text-muted-foreground">
+                                      <div>
+                                        Estado: {t.doneChange.from} → {t.doneChange.to}
+                                      </div>
+                                      <div>Fecha cambio: {new Date(t.doneChange.created).toLocaleString()}</div>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </CardContent>
+                        )}
+                      </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function SprintAnalysisSection() {
   const {
     sprintMovedTickets,
@@ -138,6 +235,9 @@ export default function SprintAnalysisSection() {
     sprintAnalysisLoading,
     sprintAnalysisError,
     fetchSprintAnalysis,
+    // new grouped fields provided by backend
+    sprintDone306Grouped,
+    sprintDone307Grouped,
   } = useAppData();
 
   const [sectionOpen, setSectionOpen] = useState(true);
@@ -226,29 +326,19 @@ JIRA_JQL_DONE_307="project = TU_PROYECTO AND sprint = \\"3.10.7\\" AND statusCat
 
           {/* Finalizados 3.10.6 stable */}
           {sprintConfigured.done306 && (
-            <CollapsibleBlock
+            <DoneByDateBlock
               title="Finalizados — 3.10.6 Stable"
-              icon="✅"
-              tickets={sprintDone306}
-              tag="done"
+              grouped={sprintDone306 && sprintDone306.length ? sprintDone306Grouped : []}
               emptyMsg="No hay tickets finalizados en el sprint 3.10.6 stable."
-              badgeClass="bg-green-100 text-green-700 hover:bg-green-100"
-              queryError={sprintQueryErrors?.done306}
-              showCopy
             />
           )}
 
           {/* Finalizados 3.10.7 */}
           {sprintConfigured.done307 && (
-            <CollapsibleBlock
+            <DoneByDateBlock
               title="Finalizados — 3.10.7"
-              icon="🏁"
-              tickets={sprintDone307}
-              tag="done"
+              grouped={sprintDone307 && sprintDone307.length ? sprintDone307Grouped : []}
               emptyMsg="No hay tickets finalizados en el sprint 3.10.7."
-              badgeClass="bg-purple-100 text-purple-700 hover:bg-purple-100"
-              queryError={sprintQueryErrors?.done307}
-              showCopy
             />
           )}
         </>

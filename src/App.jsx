@@ -2,12 +2,14 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import ReporteVersion from "./pages/ReporteVersion";
+import FinalizadosPorFecha from "./pages/FinalizadosPorFecha";
 import Sidebar from "./components/Sidebar";
 import { AppDataProvider } from "./context/AppDataContext";
 
 export default function App() {
   const location = useLocation();
-  const currentPage = location.pathname === "/reporte" ? "reporte" : "dashboard";
+  const currentPage =
+    location.pathname === "/reporte" ? "reporte" : location.pathname === "/finalizados" ? "finalizados" : "dashboard";
 
   return (
     <AppDataProvider>
@@ -18,6 +20,7 @@ export default function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/reporte" element={<ReporteVersion />} />
+            <Route path="/finalizados" element={<FinalizadosPorFecha />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>

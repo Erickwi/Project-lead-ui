@@ -50,7 +50,7 @@ function getTodayDate() {
   return `${year}-${month}-${day}`;
 }
 
-const EMPTY_FORM = { descripcion: "", prioridad: "Media", fecha: getTodayDate() };
+const EMPTY_FORM = { descripcion: "", prioridad: "Media", fecha: getTodayDate(), enviar_telegram: false };
 
 function SortableItem({ rec, onEdit, onDelete }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -126,6 +126,7 @@ function SortableItem({ rec, onEdit, onDelete }) {
 const NAV_ITEMS = [
   { id: "dashboard", label: "📊 Dashboard", title: "Centro de Mando" },
   { id: "reporte", label: "📈 Reporte", title: "Reporte de Versión" },
+  { id: "finalizados", label: "📦 Finalizados", title: "Finalizados por Fecha" },
 ];
 
 export default function Sidebar({ currentPage = "dashboard" }) {
@@ -181,6 +182,7 @@ export default function Sidebar({ currentPage = "dashboard" }) {
       descripcion: rec.descripcion,
       prioridad: rec.prioridad,
       fecha: rec.fecha ? rec.fecha.split("T")[0] : getTodayDate(),
+      enviar_telegram: rec.enviar_telegram ? Boolean(Number(rec.enviar_telegram)) : false,
     });
     setEditingId(rec.id);
     setModal(true);
@@ -379,6 +381,17 @@ export default function Sidebar({ currentPage = "dashboard" }) {
                   value={form.fecha}
                   onChange={(e) => setForm((f) => ({ ...f, fecha: e.target.value }))}
                 />
+              </div>
+              <div className="space-y-1.5 flex items-end">
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={!!form.enviar_telegram}
+                    onChange={(e) => setForm((f) => ({ ...f, enviar_telegram: e.target.checked }))}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-zinc-300">Enviar por Telegram</span>
+                </label>
               </div>
             </div>
 

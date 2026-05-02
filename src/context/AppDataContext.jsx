@@ -111,6 +111,8 @@ function useSprintAnalysisState() {
   const [movedTickets, setMovedTickets] = useState([]);
   const [done306, setDone306] = useState([]);
   const [done307, setDone307] = useState([]);
+  const [done306Grouped, setDone306Grouped] = useState([]);
+  const [done307Grouped, setDone307Grouped] = useState([]);
   const [configured, setConfigured] = useState({ moved: false, done306: false, done307: false });
   const [queryErrors, setQueryErrors] = useState({ moved: null, done306: null, done307: null });
   const [loading, setLoading] = useState(false);
@@ -126,6 +128,8 @@ function useSprintAnalysisState() {
       setMovedTickets(res.data.movedTickets || []);
       setDone306(res.data.done306 || []);
       setDone307(res.data.done307 || []);
+      setDone306Grouped(res.data.done306Grouped || []);
+      setDone307Grouped(res.data.done307Grouped || []);
       setConfigured(res.data.configured || { moved: false, done306: false, done307: false });
       setQueryErrors(res.data.errors || { moved: null, done306: null, done307: null });
       hasFetched.current = true;
@@ -140,6 +144,8 @@ function useSprintAnalysisState() {
     sprintMovedTickets: movedTickets,
     sprintDone306: done306,
     sprintDone307: done307,
+    sprintDone306Grouped: done306Grouped,
+    sprintDone307Grouped: done307Grouped,
     sprintConfigured: configured,
     sprintQueryErrors: queryErrors,
     sprintAnalysisLoading: loading,
