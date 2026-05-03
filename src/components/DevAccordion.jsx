@@ -77,7 +77,7 @@ function deployStatusBadge(status) {
   );
 }
 
-export default function DevAccordion({ tickets, doneTickets = [], onUpdate, onUpdateDeployStatus, onOpenDeployModal }) {
+export default function DevAccordion({ tickets, onUpdate, onUpdateDeployStatus, onOpenDeployModal }) {
   const devMap = {};
   const qaMap = {};
 
@@ -94,7 +94,7 @@ export default function DevAccordion({ tickets, doneTickets = [], onUpdate, onUp
     }
   }
 
-  if (tickets.length === 0 && doneTickets.length === 0) {
+  if (tickets.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
         <p className="text-5xl mb-4">📭</p>
@@ -133,67 +133,6 @@ export default function DevAccordion({ tickets, doneTickets = [], onUpdate, onUp
           {Object.entries(qaMap).map(([nombre, tks]) => (
             <DevCard key={nombre} nombre={nombre} tickets={tks} onUpdate={onUpdate} />
           ))}
-        </section>
-      )}
-
-      {/* ── FINALIZADOS ── */}
-      {doneTickets.length > 0 && (
-        <section className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <span>✅</span>
-            <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Finalizados</h2>
-            <Separator className="flex-1" />
-            <Button size="sm" onClick={onOpenDeployModal} className="text-xs">
-              🚀 Gestionar despliegues
-            </Button>
-          </div>
-
-          <Card className="overflow-hidden shadow-sm">
-            <div className="overflow-x-auto">
-              <div className="divide-y min-w-[700px]">
-              {doneTickets.map((t) => (
-                <div key={t.key} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors">
-                  {/* Status icon */}
-                  <span className="text-lg flex-shrink-0">
-                    {t.deploy_status === "confirmado" ? "✅" : t.deploy_status === "notificado" ? "⏳" : "🏁"}
-                  </span>
-
-                  {/* Key + summary */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-primary">{t.key}</span>
-                      <span className="text-sm truncate">{t.summary}</span>
-                    </div>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-xs text-muted-foreground">{t.assignee}</span>
-                      {t.cliente_nombre && (
-                        <>
-                          <span className="text-xs text-muted-foreground/40">·</span>
-                          <span className="text-xs text-muted-foreground">🏢 {t.cliente_nombre}</span>
-                        </>
-                      )}
-                      {t.dia_despliegue &&
-                        (() => {
-                          const d = parseISO(t.dia_despliegue);
-                          return isValid(d) ? (
-                            <>
-                              <span className="text-xs text-muted-foreground/40">·</span>
-                              <span className="text-xs text-muted-foreground">
-                                📅 {format(d, "d MMM", { locale: es })}
-                              </span>
-                            </>
-                          ) : null;
-                        })()}
-                    </div>
-                  </div>
-
-                  {/* Deploy status badge */}
-                  {deployStatusBadge(t.deploy_status)}
-                </div>
-              ))}
-              </div>
-            </div>
-          </Card>
         </section>
       )}
 

@@ -87,10 +87,10 @@ export default function Dashboard({ sidebarOpen, setSidebarOpen }) {
                 {tickets.length} activos
               </Badge>
             )}
-            {/* Contador finalizados */}
+            {/* Contador finalizados - link a página dedicada */}
             {!loading && !error && doneTickets.length > 0 && (
-              <Badge variant="outline" className="rounded-full text-xs text-muted-foreground whitespace-nowrap">
-                {doneTickets.length} finalizados
+              <Badge variant="outline" className="rounded-full text-xs text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50" onClick={() => window.location.href = '/finalizados'}>
+                {doneTickets.length} finalizados →
               </Badge>
             )}
 
@@ -205,13 +205,12 @@ export default function Dashboard({ sidebarOpen, setSidebarOpen }) {
 
           {/* Vista principal de tickets */}
           {!loading && !error && (
-            <DevAccordion
-              tickets={tickets}
-              doneTickets={doneTickets}
-              onUpdate={updateTicketInfo}
-              onUpdateDeployStatus={updateDeployStatus}
-              onOpenDeployModal={() => setDeployModalOpen(true)}
-            />
+              <DevAccordion
+                tickets={tickets}
+                onUpdate={updateTicketInfo}
+                onUpdateDeployStatus={updateDeployStatus}
+                onOpenDeployModal={() => setDeployModalOpen(true)}
+              />
           )}
         </main>
       </div>

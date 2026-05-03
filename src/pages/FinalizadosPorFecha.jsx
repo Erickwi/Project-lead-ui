@@ -3,19 +3,20 @@ import { useAppData } from "../context/AppDataContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PanelLeftOpen } from "lucide-react";
 
 function TicketRowSimple({ t }) {
   return (
     <div className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <a
-            href={`https://${import.meta.env.VITE_JIRA_DOMAIN || "tu-dominio.atlassian.net"}/browse/${t.key}`}
-            target="_blank"
-            rel="noreferrer"
-            className="text-xs font-bold text-primary hover:underline">
-            {t.key}
-          </a>
+  <a
+    href={`https://${import.meta.env.VITE_JIRA_DOMAIN || "qualitysoftec.atlassian.net"}/browse/${t.key}`}
+    target="_blank"
+    rel="noreferrer"
+    className="text-xs font-bold text-primary hover:underline">
+    {t.key}
+  </a>
           <span className="text-sm truncate">{t.summary}</span>
         </div>
         <div className="text-xs text-muted-foreground mt-1">
@@ -27,7 +28,7 @@ function TicketRowSimple({ t }) {
   );
 }
 
-export default function FinalizadosPorFecha() {
+export default function FinalizadosPorFecha({ sidebarOpen, setSidebarOpen }) {
   const { fetchSprintAnalysis, sprintDone306Grouped, sprintDone307Grouped, sprintAnalysisLoading } = useAppData();
   const [expandedMonth, setExpandedMonth] = useState({});
   const [expandedDate, setExpandedDate] = useState({});
@@ -151,7 +152,19 @@ export default function FinalizadosPorFecha() {
 
   return (
     <div className="p-3 sm:p-6 overflow-y-auto">
-      <h2 className="text-lg font-bold mb-4">Finalizados por fecha</h2>
+      {/* Header móvil con botón sidebar */}
+      <header className="bg-background border-b px-4 py-3 flex items-center gap-3 lg:hidden -mx-3 -mt-3 mb-4 sm:-mx-6 sm:-mt-6">
+        {!sidebarOpen && (
+          <button
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Abrir panel"
+            className="h-8 w-8 bg-primary/10 hover:bg-primary/20 text-primary rounded-md shadow-sm ring-1 ring-primary/25 flex items-center justify-center">
+            <PanelLeftOpen size={16} />
+          </button>
+        )}
+        <h1 className="text-base font-bold tracking-tight">📦 Finalizados por fecha</h1>
+      </header>
+      <h2 className="text-lg font-bold mb-4 lg:hidden">Finalizados por fecha</h2>
       <RenderGroups title="Finalizados — 3.10.6 Stable" groups={sprintDone306Grouped} />
       <RenderGroups title="Finalizados — 3.10.7" groups={sprintDone307Grouped} />
     </div>

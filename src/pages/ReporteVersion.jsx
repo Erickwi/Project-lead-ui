@@ -15,6 +15,7 @@ import RevisoresSection from "@/pages/reporte/RevisoresSection";
 import DevStatsSection from "@/pages/reporte/DevStatsSection";
 import TimelineSectionImported from "@/pages/reporte/TimelineSection";
 import PausasSection from "@/pages/reporte/PausasSection";
+import { PanelLeftOpen } from "lucide-react";
 
 const DONE_RE = /done|cerrado|finalizado|completado/i;
 
@@ -60,10 +61,15 @@ function ReporteSkeleton() {
   );
 }
 
-export default function ReporteVersion() {
-  const { datos, pausas, loading, error, crearPausa, eliminarPausa, fetchDatos } = useReporte();
+export default function ReporteVersion({ sidebarOpen, setSidebarOpen }) {
+  const {
+    datos, datosBasicos, datosChangelogs, pausas,
+    loading, loadingBasicos, loadingChangelogs, error,
+    crearPausa, eliminarPausa, fetchDatos
+  } = useReporte();
 
-  if (loading || !datos) return <ReporteSkeleton />;
+  // Mostrar skeleton solo mientras cargan los datos básicos
+  if (loadingBasicos || !datosBasicos) return <ReporteSkeleton />;
 
   if (error) {
     return (
@@ -84,21 +90,34 @@ export default function ReporteVersion() {
     );
   }
 
-  const tickets = datos.timelineTickets || [];
-  const qa = datos.qaBreakdown || {};
+  // Datos básicos (ya cargados)
+  const totales = datosBasicos.totales || {};
+  const qaBreakdown = datosBasicos.qaBreakdown || {};
   const t = {
-    total: tickets.length,
-    activos: tickets.filter((tk) => !DONE_RE.test(tk.status)).length,
-    finalizados: tickets.filter((tk) => DONE_RE.test(tk.status)).length,
-    soloInterno: qa.soloInterno?.length || 0,
-    soloOperativo: qa.soloOperativo?.length || 0,
-    ambosQA: qa.ambos?.length || 0,
-    sinQA: qa.sinQA?.length || 0,
+    total: totales.total || 0,
+    activos: totales.activos || 0,
+    finalizados: totales.finalizados || 0,
+    soloInterno: qaBreakdown.soloInterno?.length || 0,
+    soloOperativo: qaBreakdown.soloOperativo?.length || 0,
+    ambosQA: qaBreakdown.ambos?.length || 0,
+    sinQA: qaBreakdown.sinQA?.length || 0,
   };
   const qaSum = t.soloInterno + t.soloOperativo + t.ambosQA + t.sinQA;
 
   return (
     <div className="flex-1 overflow-y-auto">
+      {/* Header móvil con botón sidebar */}
+      <header className="bg-background border-b px-4 py-3 flex items-center gap-3 lg:hidden">
+        {!sidebarOpen && (
+          <button
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Abrir panel"
+            className="h-8 w-8 bg-primary/10 hover:bg-primary/20 text-primary rounded-md shadow-sm ring-1 ring-primary/25 flex items-center justify-center">
+            <PanelLeftOpen size={16} />
+          </button>
+        )}
+        <h1 className="text-base font-bold tracking-tight">📈 Reporte de Versión</h1>
+      </header>
       <div className="space-y-6 p-3 sm:p-6">
         <div className="flex flex-col lg:flex-row items-stretch gap-2">
           <Card className="border-l-4 border-l-primary lg:w-48 flex-shrink-0">
@@ -250,15 +269,40 @@ export default function ReporteVersion() {
           </div>
         </div>
 
-        <StatusDistribucion statusCounts={datos.statusCounts} />
-        <ModuloPorTipoSection moduloStats={datos.moduloStats} />
-        <QABreakdownSection qaBreakdown={datos.qaBreakdown} />
-        <RevisoresSection revInternoStats={datos.revInternoStats} revOperativoStats={datos.revOperativoStats} />
-        <DevStatsSection devStats={datos.devStats} />
-        <HorasEstadoSection timelineTickets={datos.timelineTickets} />
-        <QADevParidadSection timelineTickets={datos.timelineTickets} />
-        <RebotesQASection timelineTickets={datos.timelineTickets} />
-        <TimelineSectionImported timelineTickets={datos.timelineTickets} />
+        <StatusDistribucion statusCounts={datosBasicos.statusCounts} />
+        <ModuloPorTipoSection moduloStats={datosBasicos.moduloStats} />
+        <QABreakdownSection qaBreakdown={datosBasicos.qaBreakdown} />
+
+        {/* Secciones pesadas - se cargan progresivamente */}
+        {loadingChangelogs && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span className="animate-spin">⏳</span>
+              Cargando datos detallados (timeline, desarrolladores, revisores)...
+            </div>
+            {[1, 2, 3].map((i) => (
+              <Card key={i}>
+                <CardContent className="pt-6 pb-4 px-4 space-y-3">
+                  <Skeleton className="h-5 w-48" />
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-20 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {datosChangelogs && (
+          <>
+            <RevisoresSection revInternoStats={datosChangelogs.revInternoStats} revOperativoStats={datosChangelogs.revOperativoStats} />
+            <DevStatsSection devStats={datosChangelogs.devStats} />
+            <HorasEstadoSection timelineTickets={datosChangelogs.timelineTickets} />
+            <QADevParidadSection timelineTickets={datosChangelogs.timelineTickets} />
+            <RebotesQASection timelineTickets={datosChangelogs.timelineTickets} />
+            <TimelineSectionImported timelineTickets={datosChangelogs.timelineTickets} />
+          </>
+        )}
+
         <PausasSection pausas={pausas} crearPausa={crearPausa} eliminarPausa={eliminarPausa} />
       </div>
     </div>

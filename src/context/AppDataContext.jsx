@@ -58,30 +58,64 @@ function useTicketsState() {
   };
 }
 
-// ─── Reporte cache ────────────────────────────────────────────────────────────
+// ─── Reporte cache (carga progresiva) ────────────────────────────────────────
 
 function useReporteState() {
-  const [datos, setDatos] = useState(null);
+  const [datosBasicos, setDatosBasicos] = useState(null);
+  const [datosChangelogs, setDatosChangelogs] = useState(null);
   const [pausas, setPausas] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loadingBasicos, setLoadingBasicos] = useState(false);
+  const [loadingChangelogs, setLoadingChangelogs] = useState(false);
   const [error, setError] = useState(null);
-  const hasFetched = useRef(false);
+  const hasFetchedBasicos = useRef(false);
+  const hasFetchedChangelogs = useRef(false);
 
-  const fetchDatos = useCallback(async (force = false) => {
-    if (hasFetched.current && !force) return; // use cache
-    setLoading(true);
+  // Datos combinados para compatibilidad
+  const datos = datosBasicos ? { ...datosBasicos, ...datosChangelogs } : null;
+  const loading = loadingBasicos || loadingChangelogs;
+
+  const fetchDatosBasicos = useCallback(async (force = false) => {
+    if (hasFetchedBasicos.current && !force) return;
+    setLoadingBasicos(true);
     setError(null);
     try {
-      const res = await api.get("/reporte/datos");
-      setDatos(res.data);
-      setPausas(res.data.pausas || []);
-      hasFetched.current = true;
+      const res = await api.get("/reporte/datos-basicos");
+      setDatosBasicos(res.data);
+      hasFetchedBasicos.current = true;
     } catch (err) {
       setError(err.response?.data?.error || err.message);
     } finally {
-      setLoading(false);
+      setLoadingBasicos(false);
     }
   }, []);
+
+  const fetchDatosChangelogs = useCallback(async (force = false) => {
+    if (hasFetchedChangelogs.current && !force) return;
+    setLoadingChangelogs(true);
+    try {
+      const res = await api.get("/reporte/datos-changelogs");
+      setDatosChangelogs(res.data);
+      hasFetchedChangelogs.current = true;
+    } catch (err) {
+      console.error("Error cargando changelogs:", err.message);
+    } finally {
+      setLoadingChangelogs(false);
+    }
+  }, []);
+
+  const fetchDatos = useCallback(async (force = false) => {
+    await Promise.all([
+      fetchDatosBasicos(force),
+      fetchDatosChangelogs(force),
+    ]);
+    // Pausas
+    try {
+      const res = await api.get("/reporte/pausas");
+      setPausas(res.data.pausas || []);
+    } catch (err) {
+      console.error("Error cargando pausas:", err.message);
+    }
+  }, [fetchDatosBasicos, fetchDatosChangelogs]);
 
   const crearPausa = useCallback(async (pausa) => {
     const res = await api.post("/reporte/pausas", pausa);
@@ -96,10 +130,16 @@ function useReporteState() {
 
   return {
     datos,
+    datosBasicos,
+    datosChangelogs,
     pausas,
     reporteLoading: loading,
+    reporteLoadingBasicos: loadingBasicos,
+    reporteLoadingChangelogs: loadingChangelogs,
     reporteError: error,
     fetchDatos,
+    fetchDatosBasicos,
+    fetchDatosChangelogs,
     crearPausa,
     eliminarPausa,
   };

@@ -18,7 +18,7 @@ const PRIORITY_BADGE = {
   Lowest: "bg-muted text-muted-foreground border-border hover:bg-muted",
 };
 
-const JIRA_BASE = "https://qualitysoftec.atlassian.net/browse/";
+const JIRA_BASE = `https://${import.meta.env.VITE_JIRA_DOMAIN}/browse/`;
 
 const normalizeDate = (val) => {
   if (!val) return "";
