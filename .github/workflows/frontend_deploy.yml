@@ -25,6 +25,7 @@ jobs:
         env:
           # inyecta la URL del backend (no poner tokens sensibles)
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_JIRA_DOMAIN: ${{secrets.VITE_JIRA_DOMAIN}}
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
