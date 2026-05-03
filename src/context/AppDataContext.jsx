@@ -87,6 +87,14 @@ function useReporteState() {
     } finally {
       setLoadingBasicos(false);
     }
+    
+    // Cargar pausas por separado
+    try {
+      const pausasRes = await api.get("/reporte/pausas");
+      setPausas(pausasRes.data.pausas || []);
+    } catch (err) {
+      console.error("Error cargando pausas:", err.message);
+    }
   }, []);
 
   const fetchDatosChangelogs = useCallback(async (force = false) => {

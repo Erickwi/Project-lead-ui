@@ -15,7 +15,7 @@ export function useReporte() {
     eliminarPausa,
   } = useAppData();
 
-  // Carga progresiva: primero datos básicos, luego changelogs
+  // Carga progresiva: primero datos básicos y luego changelogs
   useEffect(() => {
     fetchDatosBasicos();
     // Cargar changelogs después de un breve delay para no bloquear la UI
