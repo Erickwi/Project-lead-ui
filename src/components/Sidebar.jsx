@@ -36,11 +36,6 @@ const PRIORITY_CFG = {
     dot: "bg-yellow-400",
   },
   Baja: { border: "border-l-green-500", badge: "bg-green-100 text-green-700 hover:bg-green-100", dot: "bg-green-500" },
-  Verde: {
-    border: "border-l-emerald-500",
-    badge: "bg-emerald-100 text-emerald-700 hover:bg-emerald-100",
-    dot: "bg-emerald-500",
-  },
 };
 
 function getTodayDate() {
@@ -66,7 +61,6 @@ function SortableItem({ rec, onEdit, onDelete }) {
   };
 
   const cfg = PRIORITY_CFG[rec.prioridad] || PRIORITY_CFG.Media;
-  const isVerde = rec.prioridad === "Verde";
 
   return (
     <div
@@ -74,7 +68,7 @@ function SortableItem({ rec, onEdit, onDelete }) {
       style={style}
       {...attributes}
       {...listeners}
-      className={`bg-zinc-900 border-l-4 ${cfg.border} rounded-r-lg p-3 group transition-all hover:bg-zinc-800 cursor-grab active:cursor-grabbing touch-none ${isVerde ? "opacity-60" : ""}`}>
+      className={`bg-zinc-900 border-l-4 ${cfg.border} rounded-r-lg p-3 group transition-all hover:bg-zinc-800 cursor-grab active:cursor-grabbing touch-none`}>
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <p className="text-sm text-zinc-100 leading-snug break-all whitespace-pre-wrap max-h-20 overflow-auto">
@@ -144,11 +138,7 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
     }),
   );
 
-  const sortedRecordatorios = [...recordatorios].sort((a, b) => {
-    if (a.prioridad === "Verde" && b.prioridad !== "Verde") return 1;
-    if (a.prioridad !== "Verde" && b.prioridad === "Verde") return -1;
-    return (a.posicion || 0) - (b.posicion || 0);
-  });
+  const sortedRecordatorios = [...recordatorios].sort((a, b) => (a.posicion || 0) - (b.posicion || 0));
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
@@ -207,43 +197,43 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
         <aside className="w-full flex-shrink-0 flex flex-col items-center bg-zinc-950 h-screen border-r border-zinc-800 py-3 gap-3 z-10">
           {/* Botón expandir */}
           <button
-             onClick={() => onToggleCollapsed(false)}
-             title="Mostrar panel"
+            onClick={() => onToggleCollapsed(false)}
+            title="Mostrar panel"
             className="w-8 h-8 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors">
             <ChevronRight size={16} />
           </button>
 
-           {/* Nav icons */}
-           <div className="flex flex-col gap-2 mt-1">
-             <button
-               onClick={() => handleNavigate("/")}
-               title="Dashboard"
-               className={`w-8 h-8 flex items-center justify-center rounded-md transition-colors ${
-                 currentPage === "dashboard"
-                   ? "bg-primary text-primary-foreground"
-                   : "text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800"
-               }`}>
-               <LayoutDashboard size={15} />
-             </button>
-             <button
-               onClick={() => handleNavigate("/reporte")}
-               title="Reporte"
-               className={`w-8 h-8 flex items-center justify-center rounded-md transition-colors ${
-                 currentPage === "reporte"
-                   ? "bg-primary text-primary-foreground"
-                   : "text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800"
-               }`}>
-               <BarChart2 size={15} />
-             </button>
-           </div>
+          {/* Nav icons */}
+          <div className="flex flex-col gap-2 mt-1">
+            <button
+              onClick={() => handleNavigate("/")}
+              title="Dashboard"
+              className={`w-8 h-8 flex items-center justify-center rounded-md transition-colors ${
+                currentPage === "dashboard"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800"
+              }`}>
+              <LayoutDashboard size={15} />
+            </button>
+            <button
+              onClick={() => handleNavigate("/reporte")}
+              title="Reporte"
+              className={`w-8 h-8 flex items-center justify-center rounded-md transition-colors ${
+                currentPage === "reporte"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800"
+              }`}>
+              <BarChart2 size={15} />
+            </button>
+          </div>
 
           {/* Nueva nota (solo icono) */}
           <div className="mt-auto mb-1">
             <button
               onClick={() => {
-                 onToggleCollapsed(false);
-                 openCreate();
-               }}
+                onToggleCollapsed(false);
+                openCreate();
+              }}
               title="Nueva nota"
               className="w-8 h-8 flex items-center justify-center rounded-md text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800 transition-colors">
               <Plus size={15} />
@@ -257,19 +247,19 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
         <aside className="w-full flex-shrink-0 flex flex-col bg-zinc-950 h-screen overflow-hidden">
           {/* Navegación principal + botón colapsar */}
           <nav className="px-3 pt-3 pb-2 border-b border-zinc-800 flex gap-1 items-center">
-           {NAV_ITEMS.map((item) => (
-               <button
-                 key={item.id}
-                 onClick={() => handleNavigate(item.id === "dashboard" ? "/" : `/${item.id}`)}
-                 title={item.title}
-                 className={`flex-1 text-xs font-semibold py-1.5 px-2 rounded transition-colors ${
-                   currentPage === item.id
-                     ? "bg-primary text-primary-foreground"
-                     : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
-                 }`}>
-                 {item.label}
-               </button>
-             ))}
+            {NAV_ITEMS.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => handleNavigate(item.id === "dashboard" ? "/" : `/${item.id}`)}
+                title={item.title}
+                className={`flex-1 text-xs font-semibold py-1.5 px-2 rounded transition-colors ${
+                  currentPage === item.id
+                    ? "bg-primary text-primary-foreground"
+                    : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+                }`}>
+                {item.label}
+              </button>
+            ))}
             {/* Colapsar */}
             <button
               onClick={() => onToggleCollapsed(true)}
@@ -297,17 +287,17 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
                 <div className="space-y-2">
                   {loading && (
                     <div className="space-y-2 mt-2">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="bg-zinc-900 border-l-4 border-l-zinc-700 rounded-r-lg p-3 space-y-2">
-                      <Skeleton className="h-3 w-full bg-zinc-800/50" />
-                      <Skeleton className="h-3 w-3/4 bg-zinc-800/50" />
-                      <div className="flex items-center gap-2">
-                        <Skeleton className="h-4 w-14 rounded-full bg-zinc-800/50" />
-                        <Skeleton className="h-3 w-16 bg-zinc-800/50" />
-                      </div>
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <div key={i} className="bg-zinc-900 border-l-4 border-l-zinc-700 rounded-r-lg p-3 space-y-2">
+                          <Skeleton className="h-3 w-full bg-zinc-800/50" />
+                          <Skeleton className="h-3 w-3/4 bg-zinc-800/50" />
+                          <div className="flex items-center gap-2">
+                            <Skeleton className="h-4 w-14 rounded-full bg-zinc-800/50" />
+                            <Skeleton className="h-3 w-16 bg-zinc-800/50" />
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
                   )}
                   {!loading && recordatorios.length === 0 && (
                     <p className="text-zinc-500 text-xs text-center mt-8 leading-relaxed">
@@ -380,7 +370,6 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
                     <SelectItem value="Alta">Alta</SelectItem>
                     <SelectItem value="Media">Media</SelectItem>
                     <SelectItem value="Baja">Baja</SelectItem>
-                    <SelectItem value="Verde">Verde</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
