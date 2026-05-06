@@ -240,6 +240,9 @@ export default function SprintAnalysisSection() {
     sprintDone307Grouped,
   } = useAppData();
 
+  const { sprintDone306Title, sprintDone307Title } = useAppData();
+  const { currentSprintTitle } = useAppData();
+
   const [sectionOpen, setSectionOpen] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -327,18 +330,39 @@ JIRA_JQL_DONE_307="project = TU_PROYECTO AND sprint = \\"3.10.7\\" AND statusCat
           {/* Finalizados 3.10.6 stable */}
           {sprintConfigured.done306 && (
             <DoneByDateBlock
-              title="Finalizados — 3.10.6 Stable"
+              title={
+                sprintDone306Title ||
+                (currentSprintTitle
+                  ? `Finalizados — ${currentSprintTitle
+                      .replace(/^Sprint:\s*/i, "")
+                      .split("·")[0]
+                      .trim()}`
+                  : "Finalizados — 3.10.6 Stable")
+              }
               grouped={sprintDone306 && sprintDone306.length ? sprintDone306Grouped : []}
-              emptyMsg="No hay tickets finalizados en el sprint 3.10.6 stable."
+              emptyMsg={
+                sprintDone306Title
+                  ? `No hay tickets finalizados en ${sprintDone306Title}.`
+                  : currentSprintTitle
+                    ? `No hay tickets finalizados en ${currentSprintTitle
+                        .replace(/^Sprint:\s*/i, "")
+                        .split("·")[0]
+                        .trim()}.`
+                    : "No hay tickets finalizados en el sprint 3.10.6 stable."
+              }
             />
           )}
 
           {/* Finalizados 3.10.7 */}
           {sprintConfigured.done307 && (
             <DoneByDateBlock
-              title="Finalizados — 3.10.7"
+              title={sprintDone307Title || "Finalizados — 3.10.7"}
               grouped={sprintDone307 && sprintDone307.length ? sprintDone307Grouped : []}
-              emptyMsg="No hay tickets finalizados en el sprint 3.10.7."
+              emptyMsg={
+                sprintDone307Title
+                  ? `No hay tickets finalizados en ${sprintDone307Title}.`
+                  : "No hay tickets finalizados en el sprint 3.10.7."
+              }
             />
           )}
         </>

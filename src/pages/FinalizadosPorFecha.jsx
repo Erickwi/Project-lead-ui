@@ -10,13 +10,13 @@ function TicketRowSimple({ t }) {
     <div className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-  <a
-    href={`https://${import.meta.env.VITE_JIRA_DOMAIN || "qualitysoftec.atlassian.net"}/browse/${t.key}`}
-    target="_blank"
-    rel="noreferrer"
-    className="text-xs font-bold text-primary hover:underline">
-    {t.key}
-  </a>
+          <a
+            href={`https://${import.meta.env.VITE_JIRA_DOMAIN || "qualitysoftec.atlassian.net"}/browse/${t.key}`}
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs font-bold text-primary hover:underline">
+            {t.key}
+          </a>
           <span className="text-sm truncate">{t.summary}</span>
         </div>
         <div className="text-xs text-muted-foreground mt-1">
@@ -30,6 +30,7 @@ function TicketRowSimple({ t }) {
 
 export default function FinalizadosPorFecha({ sidebarOpen, setSidebarOpen }) {
   const { fetchSprintAnalysis, sprintDone306Grouped, sprintDone307Grouped, sprintAnalysisLoading } = useAppData();
+  const { sprintDone306Title, sprintDone307Title } = useAppData();
   const [expandedMonth, setExpandedMonth] = useState({});
   const [expandedDate, setExpandedDate] = useState({});
 
@@ -165,8 +166,8 @@ export default function FinalizadosPorFecha({ sidebarOpen, setSidebarOpen }) {
         <h1 className="text-base font-bold tracking-tight">📦 Finalizados por fecha</h1>
       </header>
       <h2 className="text-lg font-bold mb-4 lg:hidden">Finalizados por fecha</h2>
-      <RenderGroups title="Finalizados — 3.10.6 Stable" groups={sprintDone306Grouped} />
-      <RenderGroups title="Finalizados — 3.10.7" groups={sprintDone307Grouped} />
+      <RenderGroups title={sprintDone306Title || "Finalizados — 3.10.6 Stable"} groups={sprintDone306Grouped} />
+      <RenderGroups title={sprintDone307Title || "Finalizados — 3.10.7"} groups={sprintDone307Grouped} />
     </div>
   );
 }

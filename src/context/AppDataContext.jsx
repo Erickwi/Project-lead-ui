@@ -8,6 +8,7 @@ const AppDataContext = createContext(null);
 function useTicketsState() {
   const [tickets, setTickets] = useState([]);
   const [doneTickets, setDoneTickets] = useState([]);
+  const [currentSprintTitle, setCurrentSprintTitle] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const hasFetched = useRef(false);
@@ -20,6 +21,24 @@ function useTicketsState() {
       const [active, done] = await Promise.all([api.get("/tickets"), api.get("/tickets/done")]);
       setTickets(active.data.tickets);
       setDoneTickets(done.data.tickets);
+      try {
+        const list = active.data.tickets || [];
+        const counts = {};
+        for (const t of list) {
+          const s = t.sprint || null;
+          if (!s) continue;
+          counts[s] = (counts[s] || 0) + 1;
+        }
+        const entries = Object.entries(counts);
+        if (entries.length > 0) {
+          entries.sort((a, b) => b[1] - a[1]);
+          setCurrentSprintTitle(`Sprint: ${entries[0][0]} · Proyecto Ecomex 360`);
+        } else {
+          setCurrentSprintTitle(null);
+        }
+      } catch (e) {
+        setCurrentSprintTitle(null);
+      }
       hasFetched.current = true;
     } catch (err) {
       setError(err.response?.data?.error || err.message);
@@ -55,6 +74,7 @@ function useTicketsState() {
     fetchTickets,
     updateTicketInfo,
     updateDeployStatus,
+    currentSprintTitle,
   };
 }
 
@@ -87,7 +107,7 @@ function useReporteState() {
     } finally {
       setLoadingBasicos(false);
     }
-    
+
     // Cargar pausas por separado
     try {
       const pausasRes = await api.get("/reporte/pausas");
@@ -111,19 +131,19 @@ function useReporteState() {
     }
   }, []);
 
-  const fetchDatos = useCallback(async (force = false) => {
-    await Promise.all([
-      fetchDatosBasicos(force),
-      fetchDatosChangelogs(force),
-    ]);
-    // Pausas
-    try {
-      const res = await api.get("/reporte/pausas");
-      setPausas(res.data.pausas || []);
-    } catch (err) {
-      console.error("Error cargando pausas:", err.message);
-    }
-  }, [fetchDatosBasicos, fetchDatosChangelogs]);
+  const fetchDatos = useCallback(
+    async (force = false) => {
+      await Promise.all([fetchDatosBasicos(force), fetchDatosChangelogs(force)]);
+      // Pausas
+      try {
+        const res = await api.get("/reporte/pausas");
+        setPausas(res.data.pausas || []);
+      } catch (err) {
+        console.error("Error cargando pausas:", err.message);
+      }
+    },
+    [fetchDatosBasicos, fetchDatosChangelogs],
+  );
 
   const crearPausa = useCallback(async (pausa) => {
     const res = await api.post("/reporte/pausas", pausa);
@@ -161,6 +181,8 @@ function useSprintAnalysisState() {
   const [done307, setDone307] = useState([]);
   const [done306Grouped, setDone306Grouped] = useState([]);
   const [done307Grouped, setDone307Grouped] = useState([]);
+  const [done306Title, setDone306Title] = useState(null);
+  const [done307Title, setDone307Title] = useState(null);
   const [configured, setConfigured] = useState({ moved: false, done306: false, done307: false });
   const [queryErrors, setQueryErrors] = useState({ moved: null, done306: null, done307: null });
   const [loading, setLoading] = useState(false);
@@ -176,6 +198,8 @@ function useSprintAnalysisState() {
       setMovedTickets(res.data.movedTickets || []);
       setDone306(res.data.done306 || []);
       setDone307(res.data.done307 || []);
+      setDone306Title(res.data.done306Title || null);
+      setDone307Title(res.data.done307Title || null);
       setDone306Grouped(res.data.done306Grouped || []);
       setDone307Grouped(res.data.done307Grouped || []);
       setConfigured(res.data.configured || { moved: false, done306: false, done307: false });
@@ -194,6 +218,8 @@ function useSprintAnalysisState() {
     sprintDone307: done307,
     sprintDone306Grouped: done306Grouped,
     sprintDone307Grouped: done307Grouped,
+    sprintDone306Title: done306Title,
+    sprintDone307Title: done307Title,
     sprintConfigured: configured,
     sprintQueryErrors: queryErrors,
     sprintAnalysisLoading: loading,

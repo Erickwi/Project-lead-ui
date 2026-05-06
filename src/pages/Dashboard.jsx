@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useAppData } from "../context/AppDataContext";
 import DevAccordion from "../components/DevAccordion";
 import DeployDrawer from "../components/DeployDrawer";
 import DeployNotificationModal from "../components/DeployNotificationModal";
@@ -12,6 +13,7 @@ import { PanelLeftOpen } from "lucide-react";
 
 export default function Dashboard({ sidebarOpen, setSidebarOpen }) {
   const { tickets, doneTickets, loading, error, refetch, updateTicketInfo, updateDeployStatus } = useTickets();
+  const { currentSprintTitle } = useAppData();
   const [drawerOpen, setDrawerOpen] = useState(false);
   // Release Notes removed per UX request
   const [deployModalOpen, setDeployModalOpen] = useState(false);
@@ -76,7 +78,7 @@ export default function Dashboard({ sidebarOpen, setSidebarOpen }) {
               </h1>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5 truncate">
-              Sprint: Versión 3.10.6.1 stable · Proyecto Ecomex 360
+              {currentSprintTitle || "Sprint: — · Proyecto Ecomex 360"}
             </p>
           </div>
 
@@ -89,7 +91,10 @@ export default function Dashboard({ sidebarOpen, setSidebarOpen }) {
             )}
             {/* Contador finalizados - link a página dedicada */}
             {!loading && !error && doneTickets.length > 0 && (
-              <Badge variant="outline" className="rounded-full text-xs text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50" onClick={() => window.location.href = '/finalizados'}>
+              <Badge
+                variant="outline"
+                className="rounded-full text-xs text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50"
+                onClick={() => (window.location.href = "/finalizados")}>
                 {doneTickets.length} finalizados →
               </Badge>
             )}
@@ -205,12 +210,12 @@ export default function Dashboard({ sidebarOpen, setSidebarOpen }) {
 
           {/* Vista principal de tickets */}
           {!loading && !error && (
-              <DevAccordion
-                tickets={tickets}
-                onUpdate={updateTicketInfo}
-                onUpdateDeployStatus={updateDeployStatus}
-                onOpenDeployModal={() => setDeployModalOpen(true)}
-              />
+            <DevAccordion
+              tickets={tickets}
+              onUpdate={updateTicketInfo}
+              onUpdateDeployStatus={updateDeployStatus}
+              onOpenDeployModal={() => setDeployModalOpen(true)}
+            />
           )}
         </main>
       </div>

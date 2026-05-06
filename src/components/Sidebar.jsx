@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAppData } from "../context/AppDataContext";
 import { useNavigate } from "react-router-dom";
 import { useRecordatorios } from "../hooks/useRecordatorios";
 import { Button } from "@/components/ui/button";
@@ -127,6 +128,7 @@ const NAV_ITEMS = [
 export default function Sidebar({ currentPage = "dashboard", collapsed, onToggleCollapsed, onCloseMobile }) {
   const navigate = useNavigate();
   const { recordatorios, loading, crear, actualizar, eliminar, reorder } = useRecordatorios();
+  const { currentSprintTitle } = useAppData();
   const [modal, setModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -329,7 +331,7 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
 
           {/* Footer version */}
           <div className="px-4 py-3 border-t border-zinc-800">
-            <p className="text-xs text-zinc-600 text-center">Sprint v3.10.6.1 · Ecomex 360</p>
+            <p className="text-xs text-zinc-600 text-center">{currentSprintTitle || "Sprint v— · Ecomex 360"}</p>
           </div>
         </aside>
       )}
