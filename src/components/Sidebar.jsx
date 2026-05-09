@@ -133,6 +133,7 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
   const [modal, setModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [submitting, setSubmitting] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -185,6 +186,8 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
     try {
       if (editingId) {
         await actualizar(editingId, form);
@@ -194,6 +197,8 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
       setModal(false);
     } catch (err) {
       console.error("Error guardando recordatorio:", err.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -409,10 +414,18 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="ghost" onClick={() => setModal(false)}>
+              <Button type="button" variant="ghost" onClick={() => setModal(false)} disabled={submitting}>
                 Cancelar
               </Button>
-              <Button type="submit">{editingId ? "Guardar cambios" : "Crear recordatorio"}</Button>
+              <Button type="submit" disabled={submitting}>
+                {editingId
+                  ? submitting
+                    ? "Guardando..."
+                    : "Guardar cambios"
+                  : submitting
+                    ? "Creando..."
+                    : "Crear recordatorio"}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
