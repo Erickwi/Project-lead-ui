@@ -59,7 +59,10 @@ export default function App() {
                 path="/reporte"
                 element={<ReporteVersion sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />}
               />
-              <Route path="/sprint/frederick" element={<SprintProgressFrederick />} />
+              <Route
+                path="/sprint/frederick"
+                element={<SprintProgressFrederick sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />}
+              />
               <Route
                 path="/finalizados"
                 element={<FinalizadosPorFecha sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />}

@@ -128,15 +128,13 @@ export default function ReporteVersion({ sidebarOpen, setSidebarOpen }) {
   return (
     <div className="flex-1 overflow-y-auto">
       {/* Header móvil con botón sidebar */}
-      <header className="bg-background border-b px-4 py-3 flex items-center gap-3 lg:hidden">
-        {!sidebarOpen && (
-          <button
-            onClick={() => setSidebarOpen(true)}
-            aria-label="Abrir panel"
-            className="h-8 w-8 bg-primary/10 hover:bg-primary/20 text-primary rounded-md shadow-sm ring-1 ring-primary/25 flex items-center justify-center">
-            <PanelLeftOpen size={16} />
-          </button>
-        )}
+      <header className="bg-background border-b px-4 py-3 flex items-center gap-3 lg:hidden flex-shrink-0">
+        <button
+          onClick={() => setSidebarOpen((v) => !v)}
+          aria-label="Abrir panel"
+          className="h-8 w-8 bg-primary/10 hover:bg-primary/20 text-primary rounded-md shadow-sm ring-1 ring-primary/25 flex items-center justify-center flex-shrink-0">
+          <PanelLeftOpen size={16} />
+        </button>
         <h1 className="text-base font-bold tracking-tight">📈 Reporte de Versión</h1>
         <div className="ml-auto">
           <Button size="sm" variant="ghost" onClick={handleRefresh} disabled={refreshing || loading}>

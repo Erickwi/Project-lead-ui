@@ -64,15 +64,13 @@ export default function Dashboard({ sidebarOpen, setSidebarOpen }) {
         <header className="bg-background border-b px-4 sm:px-6 py-3 flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-x-4 flex-shrink-0 shadow-sm">
           <div className="min-w-0 flex-1">
             <div className="flex items-center">
-              {/* Mobile toggle: show to the left of the title on small screens and only when sidebar is closed */}
-              {!sidebarOpen && (
-                <button
-                  onClick={() => setSidebarOpen(true)}
-                  aria-label="Abrir panel"
-                  className="mr-3 lg:hidden h-8 w-8 bg-primary/10 hover:bg-primary/20 text-primary rounded-md shadow-sm ring-1 ring-primary/25 flex items-center justify-center">
-                  <PanelLeftOpen size={16} />
-                </button>
-              )}
+              {/* Mobile toggle */}
+              <button
+                onClick={() => setSidebarOpen((v) => !v)}
+                aria-label="Abrir panel"
+                className="mr-3 lg:hidden h-8 w-8 bg-primary/10 hover:bg-primary/20 text-primary rounded-md shadow-sm ring-1 ring-primary/25 flex items-center justify-center flex-shrink-0">
+                <PanelLeftOpen size={16} />
+              </button>
               <h1 className="text-base sm:text-xl font-bold tracking-tight leading-tight flex items-center">
                 📊 Centro de Mando — Project Lead
               </h1>
