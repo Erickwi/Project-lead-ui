@@ -8,7 +8,7 @@ const Switch = React.forwardRef(function Switch({ className, checked, onCheckedC
       ref={ref}
       className={cn(
         "relative inline-flex h-6 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
-        checked ? "bg-primary" : "bg-zinc-700",
+        checked ? "bg-blue-400" : "bg-zinc-700",
         className,
       )}
       checked={checked}

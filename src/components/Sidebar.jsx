@@ -28,7 +28,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { ChevronLeft, ChevronRight, LayoutDashboard, BarChart2, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, LayoutDashboard, BarChart2, Plus, Activity } from "lucide-react";
 
 const PRIORITY_CFG = {
   Alta: { border: "border-l-red-500", badge: "bg-red-100 text-red-700 hover:bg-red-100", dot: "bg-red-500" },
@@ -237,6 +237,16 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
               }`}>
               <BarChart2 size={15} />
             </button>
+            <button
+              onClick={() => handleNavigate("/sprint/frederick")}
+              title="Sprint Frederick"
+              className={`w-8 h-8 flex items-center justify-center rounded-md transition-colors ${
+                currentPage === "sprint"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800"
+              }`}>
+              <Activity size={15} />
+            </button>
           </div>
 
           {/* Nueva nota (solo icono) */}
@@ -252,32 +262,48 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
           </div>
         </aside>
       )}
-
-      {/* ── Sidebar expandido ── */}
       {!collapsed && (
         <aside className="w-full flex-shrink-0 flex flex-col bg-zinc-950 h-screen overflow-hidden">
           {/* Navegación principal + botón colapsar */}
-          <nav className="px-3 pt-3 pb-2 border-b border-zinc-800 flex gap-1 items-center">
-            {NAV_ITEMS.map((item) => (
+          <nav className="px-3 pt-3 pb-2 border-b border-zinc-800 flex items-center">
+            <div className="flex-1 overflow-x-auto">
+              <div className="flex gap-1 items-center whitespace-nowrap">
+                {NAV_ITEMS.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => handleNavigate(item.id === "dashboard" ? "/" : `/${item.id}`)}
+                    title={item.title}
+                    className={`flex-none inline-flex items-center justify-center min-w-[110px] text-xs font-semibold py-1.5 px-2 rounded transition-colors ${
+                      currentPage === item.id
+                        ? "bg-primary text-primary-foreground"
+                        : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+                    }`}>
+                    {item.label}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => handleNavigate("/sprint/frederick")}
+                  title="Sprint Frederick"
+                  className={`flex-none inline-flex items-center justify-center min-w-[140px] text-xs font-semibold py-1.5 px-2 rounded transition-colors ${
+                    currentPage === "sprint"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+                  }`}>
+                  🏃 Sprint Frederick
+                </button>
+              </div>
+            </div>
+
+            {/* Colapsar (fijo a la derecha) */}
+            <div className="ml-2 flex-shrink-0">
               <button
-                key={item.id}
-                onClick={() => handleNavigate(item.id === "dashboard" ? "/" : `/${item.id}`)}
-                title={item.title}
-                className={`flex-1 text-xs font-semibold py-1.5 px-2 rounded transition-colors ${
-                  currentPage === item.id
-                    ? "bg-primary text-primary-foreground"
-                    : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
-                }`}>
-                {item.label}
+                onClick={() => onToggleCollapsed(true)}
+                title="Ocultar panel"
+                className="w-7 h-7 flex items-center justify-center rounded text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800 transition-colors">
+                <ChevronLeft size={15} />
               </button>
-            ))}
-            {/* Colapsar */}
-            <button
-              onClick={() => onToggleCollapsed(true)}
-              title="Ocultar panel"
-              className="ml-1 w-7 h-7 flex items-center justify-center rounded text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800 transition-colors flex-shrink-0">
-              <ChevronLeft size={15} />
-            </button>
+            </div>
           </nav>
 
           {/* Header */}

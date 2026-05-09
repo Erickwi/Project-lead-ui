@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import ReporteVersion from "./pages/ReporteVersion";
+import SprintProgressFrederick from "./pages/SprintProgressFrederick";
 import FinalizadosPorFecha from "./pages/FinalizadosPorFecha";
 import Sidebar from "./components/Sidebar";
 import { AppDataProvider } from "./context/AppDataContext";
@@ -17,7 +18,13 @@ export default function App() {
     return localStorage.getItem("sidebar-collapsed") === "true";
   });
   const currentPage =
-    location.pathname === "/reporte" ? "reporte" : location.pathname === "/finalizados" ? "finalizados" : "dashboard";
+    location.pathname === "/reporte"
+      ? "reporte"
+      : location.pathname === "/finalizados"
+        ? "finalizados"
+        : location.pathname.startsWith("/sprint")
+          ? "sprint"
+          : "dashboard";
 
   const handleToggleCollapsed = (value) => {
     setCollapsed(value);
@@ -52,6 +59,7 @@ export default function App() {
                 path="/reporte"
                 element={<ReporteVersion sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />}
               />
+              <Route path="/sprint/frederick" element={<SprintProgressFrederick />} />
               <Route
                 path="/finalizados"
                 element={<FinalizadosPorFecha sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />}
