@@ -3,6 +3,7 @@ import { useAppData } from "../context/AppDataContext";
 import { useNavigate } from "react-router-dom";
 import { useRecordatorios } from "../hooks/useRecordatorios";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -141,6 +142,10 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
   );
 
   const sortedRecordatorios = [...recordatorios].sort((a, b) => (a.posicion || 0) - (b.posicion || 0));
+  const [filterTelegram, setFilterTelegram] = useState(false);
+  const displayRecordatorios = filterTelegram
+    ? sortedRecordatorios.filter((r) => !!(r.enviar_telegram === true || Number(r.enviar_telegram) === 1))
+    : sortedRecordatorios;
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
@@ -273,12 +278,19 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
           {/* Header */}
           <div className="px-4 py-4 border-b border-zinc-800 flex items-center justify-between">
             <h2 className="text-sm font-bold tracking-wider text-zinc-100 uppercase">📋 Notas & Recordatorios</h2>
-            <Button
-              size="sm"
-              onClick={openCreate}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold">
-              + Nuevo
-            </Button>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Switch checked={filterTelegram} onCheckedChange={(v) => setFilterTelegram(!!v)} />
+                <span className="text-xs text-zinc-300">Telegram</span>
+              </div>
+
+              <Button
+                size="sm"
+                onClick={openCreate}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold">
+                + Nuevo
+              </Button>
+            </div>
           </div>
 
           {/* Lista */}
@@ -307,7 +319,7 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
                       Crea el primero con el botón +
                     </p>
                   )}
-                  {sortedRecordatorios.map((rec) => (
+                  {displayRecordatorios.map((rec) => (
                     <SortableItem
                       key={rec.id}
                       rec={rec}

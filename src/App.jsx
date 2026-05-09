@@ -33,7 +33,7 @@ export default function App() {
             <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
           )}
           <div
-            className={`fixed lg:relative z-50 lg:z-auto h-full ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"} transition-[transform,width] duration-200 ${collapsed ? "w-12" : "w-72"}`}>
+            className={`fixed lg:relative z-50 lg:z-auto h-full ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"} transition-[transform,width] duration-200 ${collapsed ? "w-12" : "w-80"}`}>
             <Sidebar
               currentPage={currentPage}
               collapsed={collapsed}
