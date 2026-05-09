@@ -1,4 +1,5 @@
 import { useReporte } from "../hooks/useReporte";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,7 +16,7 @@ import RevisoresSection from "@/pages/reporte/RevisoresSection";
 import DevStatsSection from "@/pages/reporte/DevStatsSection";
 import TimelineSectionImported from "@/pages/reporte/TimelineSection";
 import PausasSection from "@/pages/reporte/PausasSection";
-import { PanelLeftOpen } from "lucide-react";
+import { PanelLeftOpen, RefreshCw } from "lucide-react";
 
 const DONE_RE = /done|cerrado|finalizado|completado/i;
 
@@ -62,11 +63,31 @@ function ReporteSkeleton() {
 }
 
 export default function ReporteVersion({ sidebarOpen, setSidebarOpen }) {
+  const [refreshing, setRefreshing] = useState(false);
   const {
-    datos, datosBasicos, datosChangelogs, pausas,
-    loading, loadingBasicos, loadingChangelogs, error,
-    crearPausa, eliminarPausa, fetchDatos
+    datos,
+    datosBasicos,
+    datosChangelogs,
+    pausas,
+    loading,
+    loadingBasicos,
+    loadingChangelogs,
+    error,
+    crearPausa,
+    eliminarPausa,
+    fetchDatos,
   } = useReporte();
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await fetchDatos(true);
+    } catch (e) {
+      console.error("Error al refrescar reporte:", e.message || e);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   // Mostrar skeleton solo mientras cargan los datos básicos
   if (loadingBasicos || !datosBasicos) return <ReporteSkeleton />;
@@ -117,7 +138,21 @@ export default function ReporteVersion({ sidebarOpen, setSidebarOpen }) {
           </button>
         )}
         <h1 className="text-base font-bold tracking-tight">📈 Reporte de Versión</h1>
+        <div className="ml-auto">
+          <Button size="sm" variant="ghost" onClick={handleRefresh} disabled={refreshing || loading}>
+            {refreshing || loading ? "⏳" : <RefreshCw size={14} />}
+          </Button>
+        </div>
       </header>
+      {/* Header escritorio: título + refresh */}
+      <div className="hidden lg:flex items-center justify-between px-4 pt-4">
+        <h1 className="text-lg font-bold">📈 Reporte de Versión</h1>
+        <div>
+          <Button size="sm" onClick={handleRefresh} disabled={refreshing || loading}>
+            {refreshing || loading ? "Recargando..." : "Refrescar"}
+          </Button>
+        </div>
+      </div>
       <div className="space-y-6 p-3 sm:p-6">
         <div className="flex flex-col lg:flex-row items-stretch gap-2">
           <Card className="border-l-4 border-l-primary lg:w-48 flex-shrink-0">
@@ -294,7 +329,10 @@ export default function ReporteVersion({ sidebarOpen, setSidebarOpen }) {
 
         {datosChangelogs && (
           <>
-            <RevisoresSection revInternoStats={datosChangelogs.revInternoStats} revOperativoStats={datosChangelogs.revOperativoStats} />
+            <RevisoresSection
+              revInternoStats={datosChangelogs.revInternoStats}
+              revOperativoStats={datosChangelogs.revOperativoStats}
+            />
             <DevStatsSection devStats={datosChangelogs.devStats} />
             <HorasEstadoSection timelineTickets={datosChangelogs.timelineTickets} />
             <QADevParidadSection timelineTickets={datosChangelogs.timelineTickets} />

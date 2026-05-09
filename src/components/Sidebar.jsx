@@ -233,7 +233,6 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
           <div className="mt-auto mb-1">
             <button
               onClick={() => {
-                onToggleCollapsed(false);
                 openCreate();
               }}
               title="Nueva nota"
