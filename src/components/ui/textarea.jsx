@@ -9,18 +9,27 @@ function Textarea({ className, autosize = false, ...props }) {
     if (!autosize) return;
     const el = ref.current;
     if (!el) return;
+    const getMax = () => Math.round(window.innerHeight * 0.5); // 50vh limit for textarea
 
     const adjust = () => {
       el.style.height = "auto";
-      el.style.height = `${el.scrollHeight}px`;
+      const scrollH = el.scrollHeight;
+      const maxH = getMax();
+      const finalH = Math.min(scrollH, maxH);
+      el.style.height = `${finalH}px`;
+      el.style.overflowY = scrollH > maxH ? "auto" : "hidden";
     };
 
     // Ajustar inicialmente y al cambiar el valor controlado
     adjust();
 
-    // Escuchar input para ajuste en caso de uso uncontrolled
+    // Escuchar input y resize para ajuste
     el.addEventListener("input", adjust);
-    return () => el.removeEventListener("input", adjust);
+    window.addEventListener("resize", adjust);
+    return () => {
+      el.removeEventListener("input", adjust);
+      window.removeEventListener("resize", adjust);
+    };
   }, [props.value, autosize]);
 
   return (
