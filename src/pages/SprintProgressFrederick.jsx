@@ -162,39 +162,56 @@ export default function SprintProgressFrederick({ sidebarOpen, setSidebarOpen })
             <Card>
               <CardContent className="p-4">
                 <h2 className="font-semibold mb-2">Tickets ({total})</h2>
-                <div className="space-y-2 max-h-96 overflow-auto">
-                  {sortedTickets.length === 0 && <p className="text-sm text-muted-foreground">Sin tickets.</p>}
-                  {sortedTickets.map((t) => (
-                    <div key={t.key || t.id} className="p-2 border border-zinc-700 rounded bg-white-800">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="min-w-0">
-                          <div className="text-sm font-medium truncate flex items-center gap-2">
-                            {ticketUrl(t.key) ? (
-                              <a
-                                href={ticketUrl(t.key)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="hover:underline mr-1">
-                                {t.key}
-                              </a>
-                            ) : (
-                              <span className="mr-1">{t.key}</span>
-                            )}
-                            <span className="truncate">— {t.summary || "Sin título"}</span>
-                          </div>
-                          <div className="flex items-center gap-3 mt-1">
-                            <div className="text-xs text-muted-foreground truncate">{t.assignee || "—"}</div>
-                            <div className="hidden sm:block">
+                <div className="max-h-96 overflow-auto">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm min-w-[520px]">
+                      <thead>
+                        <tr className="border-b border-zinc-700 text-xs text-muted-foreground">
+                          <th className="text-left py-1 pr-3 font-medium whitespace-nowrap">Ticket</th>
+                          <th className="text-left py-1 pr-3 font-medium">Título</th>
+                          <th className="text-left py-1 pr-3 font-medium whitespace-nowrap">Asignado</th>
+                          <th className="text-left py-1 pr-3 font-medium whitespace-nowrap">Prioridad</th>
+                          <th className="text-left py-1 font-medium whitespace-nowrap">Estado</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-800">
+                        {sortedTickets.length === 0 && (
+                          <tr>
+                            <td colSpan={5} className="py-4 text-center text-muted-foreground">
+                              Sin tickets.
+                            </td>
+                          </tr>
+                        )}
+                        {sortedTickets.map((t) => (
+                          <tr key={t.key || t.id} className="hover:bg-zinc-800/40">
+                            <td className="py-2 pr-3 font-medium whitespace-nowrap">
+                              {ticketUrl(t.key) ? (
+                                <a
+                                  href={ticketUrl(t.key)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="hover:underline text-primary">
+                                  {t.key}
+                                </a>
+                              ) : (
+                                <span>{t.key}</span>
+                              )}
+                            </td>
+                            <td className="py-2 pr-3">{t.summary || "Sin título"}</td>
+                            <td className="py-2 pr-3 whitespace-nowrap text-xs text-muted-foreground">
+                              {t.assignee || "—"}
+                            </td>
+                            <td className="py-2 pr-3 whitespace-nowrap">
                               <PriorityBadge priority={t.priority} />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="ml-4 flex-shrink-0">
-                          <StatusBadge status={t.status} />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                            </td>
+                            <td className="py-2 whitespace-nowrap">
+                              <StatusBadge status={t.status} />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </CardContent>
             </Card>
