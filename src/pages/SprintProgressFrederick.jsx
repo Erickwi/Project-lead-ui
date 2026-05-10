@@ -26,6 +26,16 @@ function StatusBadge({ status }) {
   return <span className={cls}>{status}</span>;
 }
 
+function PriorityBadge({ priority }) {
+  const p = (priority || "").toLowerCase();
+  let cls = "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ";
+  if (p.includes("highest") || p.includes("blocker") || p.includes("critical") || p.includes("high"))
+    cls += "bg-red-600 text-white";
+  else if (p.includes("medium") || p.includes("med")) cls += "bg-amber-500 text-white";
+  else if (p.includes("low") || p.includes("lowest")) cls += "bg-emerald-500 text-white";
+  else cls += "bg-zinc-600 text-white";
+  return <span className={cls}>{priority || "—"}</span>;
+}
 export default function SprintProgressFrederick({ sidebarOpen, setSidebarOpen }) {
   const [loading, setLoading] = useState(false);
   const [tickets, setTickets] = useState([]);
@@ -53,6 +63,13 @@ export default function SprintProgressFrederick({ sidebarOpen, setSidebarOpen })
   const total = tickets.length;
   const finished = tickets.filter((t) => DONE_RE.test(t.status || "")).length;
   const percent = total ? Math.round((finished / total) * 100) : 0;
+
+  const PRIORITY_ORDER = { highest: 0, blocker: 0, critical: 1, high: 2, medium: 3, low: 4, lowest: 5 };
+  const sortedTickets = [...tickets].sort((a, b) => {
+    const pa = PRIORITY_ORDER[(a.priority || "").toLowerCase()] ?? 99;
+    const pb = PRIORITY_ORDER[(b.priority || "").toLowerCase()] ?? 99;
+    return pa - pb;
+  });
 
   const byStatus = {};
   for (const t of tickets) {
@@ -146,12 +163,12 @@ export default function SprintProgressFrederick({ sidebarOpen, setSidebarOpen })
               <CardContent className="p-4">
                 <h2 className="font-semibold mb-2">Tickets ({total})</h2>
                 <div className="space-y-2 max-h-96 overflow-auto">
-                  {tickets.length === 0 && <p className="text-sm text-muted-foreground">Sin tickets.</p>}
-                  {tickets.map((t) => (
+                  {sortedTickets.length === 0 && <p className="text-sm text-muted-foreground">Sin tickets.</p>}
+                  {sortedTickets.map((t) => (
                     <div key={t.key || t.id} className="p-2 border border-zinc-700 rounded bg-white-800">
                       <div className="flex items-center justify-between gap-2">
                         <div className="min-w-0">
-                          <div className="text-sm font-medium truncate">
+                          <div className="text-sm font-medium truncate flex items-center gap-2">
                             {ticketUrl(t.key) ? (
                               <a
                                 href={ticketUrl(t.key)}
@@ -163,9 +180,14 @@ export default function SprintProgressFrederick({ sidebarOpen, setSidebarOpen })
                             ) : (
                               <span className="mr-1">{t.key}</span>
                             )}
-                            — {t.summary || "Sin título"}
+                            <span className="truncate">— {t.summary || "Sin título"}</span>
                           </div>
-                          <div className="text-xs text-muted-foreground truncate">{t.assignee || "—"}</div>
+                          <div className="flex items-center gap-3 mt-1">
+                            <div className="text-xs text-muted-foreground truncate">{t.assignee || "—"}</div>
+                            <div className="hidden sm:block">
+                              <PriorityBadge priority={t.priority} />
+                            </div>
+                          </div>
                         </div>
                         <div className="ml-4 flex-shrink-0">
                           <StatusBadge status={t.status} />

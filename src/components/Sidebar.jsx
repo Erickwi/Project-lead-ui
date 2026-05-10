@@ -311,7 +311,11 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
             <h2 className="text-sm font-bold tracking-wider text-zinc-100 uppercase">📋 Notas & Recordatorios</h2>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
-                <Switch checked={filterTelegram} onCheckedChange={(v) => setFilterTelegram(!!v)} />
+                <Switch
+                  checked={filterTelegram}
+                  onCheckedChange={(v) => setFilterTelegram(!!v)}
+                  className="flex-shrink-0"
+                />
                 <span className="text-xs text-zinc-300">Telegram</span>
               </div>
 

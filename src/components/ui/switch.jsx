@@ -7,7 +7,7 @@ const Switch = React.forwardRef(function Switch({ className, checked, onCheckedC
     <SwitchPrimitive.Root
       ref={ref}
       className={cn(
-        "relative inline-flex h-6 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
+        "relative inline-flex h-6 w-10 flex-shrink-0 box-border align-middle cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none focus-visible:ring-0 sm:focus-visible:ring-2 sm:focus-visible:ring-ring/60 no-min-size",
         checked ? "bg-blue-400" : "bg-zinc-700",
         className,
       )}

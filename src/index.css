@@ -155,4 +155,10 @@ body,
             min-width: 36px;
         }
     }
+
+    /* Exceptions: some tiny UI controls (Switch) should not be forced to 36px */
+    .no-min-size {
+        min-height: unset !important;
+        min-width: unset !important;
+    }
 }
