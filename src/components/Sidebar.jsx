@@ -350,7 +350,7 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
           <ScrollArea className="flex-1 p-3 overflow-y-auto">
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={sortedRecordatorios.map((r) => r.id)} strategy={verticalListSortingStrategy}>
-                <div className="gap-y-2">
+                <div className="flex flex-col gap-y-2">
                   {loading && (
                     <div className="space-y-2 mt-2">
                       {[1, 2, 3, 4, 5].map((i) => (
