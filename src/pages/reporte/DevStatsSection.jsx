@@ -22,8 +22,8 @@ export default function DevStatsSection({ devStats }) {
         </p>
       </CardHeader>
       <CardContent className="px-4 pb-4">
-         <div className="rounded-lg border overflow-x-auto">
-           <table className="w-full text-xs whitespace-nowrap min-w-[900px]">
+        <div className="rounded-lg border overflow-x-auto">
+          <table className="w-full text-xs whitespace-nowrap min-w-[900px]">
             <thead className="bg-muted/50">
               <tr>
                 <th className="text-left px-3 py-2 font-medium text-muted-foreground">Desarrollador</th>
@@ -63,7 +63,7 @@ export default function DevStatsSection({ devStats }) {
                     <td className={`px-3 py-2 text-center ${retrasoColor}`}>{s.ticketsConRetraso}</td>
                     <td
                       className={`px-3 py-2 text-center ${s.retrasoPromedioDias > 0 ? "text-orange-600" : "text-muted-foreground"}`}>
-                      {s.retrasoPromedioDias > 0 ? `+${s.retrasoPromedioDias}d` : "—"}
+                      {s.retrasoPromedioDias > 0 ? `+${s.retrasoPromedioDias}d` : "N/A"}
                     </td>
                     <td className="px-3 py-2 min-w-[80px]">
                       <div className="bg-muted rounded-full h-2 overflow-hidden">

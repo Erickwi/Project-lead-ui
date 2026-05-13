@@ -41,7 +41,9 @@ function buildInitialText(doneTickets) {
 
 /* ── component ────────────────────────────────────────────── */
 
-export default function ServerUpdateModal({ open, onClose, doneTickets = [] }) {
+const EMPTY_DONE_TICKETS = [];
+
+export default function ServerUpdateModal({ open, onClose, doneTickets = EMPTY_DONE_TICKETS }) {
   const [copied, setCopied] = useState(false);
   const [text, setText] = useState("");
 

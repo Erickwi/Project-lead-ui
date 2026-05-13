@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { parseISO, isValid } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -20,25 +20,46 @@ const PRIORITY_BADGE = {
 
 const JIRA_BASE = `https://${import.meta.env.VITE_JIRA_DOMAIN}/browse/`;
 
-const normalizeDate = (val) => {
+function normalizeDate(val) {
   if (!val) return "";
   const d = parseISO(val);
   return isValid(d) ? val : "";
-};
+}
+
+function LocalDateDisplay({ isoString }) {
+  const [dateStr, setDateStr] = useState("");
+  useEffect(() => {
+    setDateStr(
+      new Date(isoString).toLocaleString("es-ES", {
+        day: "2-digit",
+        month: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    );
+  }, [isoString]);
+  return <span suppressHydrationWarning>{dateStr}</span>;
+}
 
 export default function TicketRow({ ticket, onUpdate }) {
   const [open, setOpen] = useState(false);
-  const [cliente, setCliente] = useState(ticket.cliente_nombre || "");
-  const [dia, setDia] = useState(normalizeDate(ticket.dia_despliegue));
-  const [otrasVersiones, setOtrasVersiones] = useState(ticket.otrasVersiones || "");
-  const [mostrarClienteDespliegue, setMostrarClienteDespliegue] = useState(ticket.mostrarClienteDespliegue !== false);
+  const [cliente, setCliente] = useState(() => ticket.cliente_nombre || "");
+  const [dia, setDia] = useState(() => normalizeDate(ticket.dia_despliegue));
+  const [otrasVersiones, setOtrasVersiones] = useState(() => ticket.otrasVersiones || "");
+  const [mostrarClienteDespliegue, setMostrarClienteDespliegue] = useState(
+    () => ticket.mostrarClienteDespliegue !== false,
+  );
 
+  const prevTicketRef = useRef(null);
   useEffect(() => {
-    setCliente(ticket.cliente_nombre || "");
-    setDia(normalizeDate(ticket.dia_despliegue));
-    setOtrasVersiones(ticket.otrasVersiones || "");
-    setMostrarClienteDespliegue(ticket.mostrarClienteDespliegue !== false);
-  }, [ticket.cliente_nombre, ticket.dia_despliegue, ticket.otrasVersiones, ticket.mostrarClienteDespliegue]);
+    if (prevTicketRef.current?.key !== ticket.key) {
+      setCliente(ticket.cliente_nombre || "");
+      setDia(normalizeDate(ticket.dia_despliegue));
+      setOtrasVersiones(ticket.otrasVersiones || "");
+      setMostrarClienteDespliegue(ticket.mostrarClienteDespliegue !== false);
+    }
+    prevTicketRef.current = ticket;
+  }, [ticket]);
 
   const persist = (updates) => {
     onUpdate(ticket.key, {
@@ -86,8 +107,16 @@ export default function TicketRow({ ticket, onUpdate }) {
     <div className="border-b last:border-0">
       {/* ── Fila clickeable ── */}
       <div
+        role="button"
+        tabIndex={0}
         className="flex items-center gap-2 px-4 py-3 hover:bg-muted/50 cursor-pointer transition-colors select-none"
-        onClick={() => setOpen((o) => !o)}>
+        onClick={() => setOpen((o) => !o)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setOpen((o) => !o);
+          }
+        }}>
         {/* Caret */}
         <span className="text-muted-foreground/50 text-xs w-3 flex-shrink-0">{open ? "▼" : "▶"}</span>
 
@@ -144,8 +173,15 @@ export default function TicketRow({ ticket, onUpdate }) {
         {ticket.numComentarios > 0 && (
           <Badge
             variant="outline"
-            className="flex-shrink-0 text-xs cursor-default"
+            role="button"
+            tabIndex={0}
+            className="flex-shrink-0 text-xs cursor-pointer"
             onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.stopPropagation();
+              }
+            }}
             title={`${ticket.numComentarios} comentarios`}>
             💬 {ticket.numComentarios}
           </Badge>
@@ -287,20 +323,15 @@ export default function TicketRow({ ticket, onUpdate }) {
             <div className="mt-4">
               <Separator className="mb-3" />
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                💬 Últimas observaciones
+                💬 Ultimas observaciones
               </p>
               <div className="space-y-2">
                 {ticket.comentarios.map((c, i) => (
-                  <div key={i} className="bg-background rounded-lg p-3 border">
+                  <div key={`${c.autor}-${c.fecha || i}`} className="bg-background rounded-lg p-3 border">
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-xs font-bold">{c.autor}</span>
                       <span className="text-xs text-muted-foreground">
-                        {new Date(c.fecha).toLocaleString("es-ES", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        <LocalDateDisplay isoString={c.fecha} />
                       </span>
                     </div>
                     <MarkdownText text={c.texto} />

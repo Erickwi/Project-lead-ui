@@ -10,9 +10,9 @@ import { cn } from "@/lib/utils";
 export function DatePicker({ value, onChange, placeholder = "Seleccionar fecha", className, disabled }) {
   const [open, setOpen] = useState(false);
 
-  const parsed   = value ? parseISO(value) : undefined;
+  const parsed = value ? parseISO(value) : undefined;
   const selected = parsed && isValid(parsed) ? parsed : undefined;
-  const display  = selected ? format(selected, "d MMM yyyy", { locale: es }) : null;
+  const display = selected ? format(selected, "d MMM yyyy", { locale: es }) : null;
 
   const handleSelect = (day) => {
     if (day) {
@@ -34,9 +34,8 @@ export function DatePicker({ value, onChange, placeholder = "Seleccionar fecha",
             "h-9 w-full justify-start gap-2 px-3 text-sm font-normal",
             !selected && "text-muted-foreground",
             className,
-          )}
-        >
-          <CalendarIcon className="h-3.5 w-3.5 shrink-0 opacity-50" />
+          )}>
+          <CalendarIcon className="size-3.5 shrink-0 opacity-50" />
           <span>{display ?? placeholder}</span>
         </Button>
       </PopoverTrigger>

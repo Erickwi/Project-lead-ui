@@ -40,7 +40,7 @@ export function StatusDistribucion({ statusCounts }) {
   );
 }
 
-// ─── Sección: QA Interno vs Operativo — conteo de revisiones ─
+// ─── Sección: QA Interno vs Operativo: conteo de revisiones ─
 export function QADevParidadSection({ timelineTickets }) {
   function classifyTicket(t) {
     const hasInt = (t.contadorQAInterno ?? 0) > 0;
@@ -168,20 +168,20 @@ export function QADevParidadSection({ timelineTickets }) {
                 </div>
               </div>
 
-               <div className="rounded border overflow-hidden mt-1 overflow-x-auto">
-                 <table className="w-full text-xs min-w-[640px]">
-                   <thead className="bg-muted/40">
-                     <tr>
-                       <th className="text-left px-2 py-1 font-medium text-muted-foreground">Ticket</th>
-                       <th className="text-center px-2 py-1 font-medium text-muted-foreground">Dev(s)</th>
-                       <th className="text-center px-2 py-1 font-medium text-muted-foreground">Categoría</th>
-                       <th className="text-center px-2 py-1 font-medium text-blue-600">Int.</th>
-                       <th className="text-center px-2 py-1 font-medium text-muted-foreground">Rev. Int.</th>
-                       <th className="text-center px-2 py-1 font-medium text-purple-600">Op.</th>
-                       <th className="text-center px-2 py-1 font-medium text-muted-foreground">Rev. Op.</th>
-                       <th className="text-center px-2 py-1 font-medium text-muted-foreground">Dif.</th>
-                     </tr>
-                   </thead>
+              <div className="rounded border overflow-hidden mt-1 overflow-x-auto">
+                <table className="w-full text-xs min-w-[640px]">
+                  <thead className="bg-muted/40">
+                    <tr>
+                      <th className="text-left px-2 py-1 font-medium text-muted-foreground">Ticket</th>
+                      <th className="text-center px-2 py-1 font-medium text-muted-foreground">Dev(s)</th>
+                      <th className="text-center px-2 py-1 font-medium text-muted-foreground">Categoría</th>
+                      <th className="text-center px-2 py-1 font-medium text-blue-600">Int.</th>
+                      <th className="text-center px-2 py-1 font-medium text-muted-foreground">Rev. Int.</th>
+                      <th className="text-center px-2 py-1 font-medium text-purple-600">Op.</th>
+                      <th className="text-center px-2 py-1 font-medium text-muted-foreground">Rev. Op.</th>
+                      <th className="text-center px-2 py-1 font-medium text-muted-foreground">Dif.</th>
+                    </tr>
+                  </thead>
                   <tbody className="divide-y">
                     {sortedTickets.map((t) => {
                       const rInt = t.contadorQAInterno ?? 0;
@@ -214,7 +214,7 @@ export function QADevParidadSection({ timelineTickets }) {
                             {t.revInterno && t.revInterno !== "N/A" ? (
                               <span className="text-blue-600">{t.revInterno.split(" ")[0]}</span>
                             ) : (
-                              <span className="text-muted-foreground/30">—</span>
+                              <span className="text-muted-foreground/30">N/A</span>
                             )}
                           </td>
                           <td className="px-2 py-1 text-center">
@@ -227,12 +227,12 @@ export function QADevParidadSection({ timelineTickets }) {
                             {t.revOperativo && t.revOperativo !== "N/A" ? (
                               <span className="text-purple-600">{t.revOperativo.split(" ")[0]}</span>
                             ) : (
-                              <span className="text-muted-foreground/30">—</span>
+                              <span className="text-muted-foreground/30">N/A</span>
                             )}
                           </td>
                           <td className="px-2 py-1 text-center font-semibold">
                             {cat !== "ambos" ? (
-                              <span className="text-muted-foreground/30">—</span>
+                              <span className="text-muted-foreground/30">N/A</span>
                             ) : tdiff === 0 ? (
                               <span className="text-green-500">=</span>
                             ) : tdiff > 0 ? (
@@ -253,7 +253,7 @@ export function QADevParidadSection({ timelineTickets }) {
 
         <p className="text-xs text-muted-foreground border-t pt-2">
           <strong>Solo Int.</strong>: revisado internamente pero aún no llegó a QA Operativo ·<strong> Solo Op.</strong>
-          : llegó a QA Operativo sin pasar por QA Interno ·<strong> Ambos</strong>: pasó por los dos revisores — aquí
+          : llegó a QA Operativo sin pasar por QA Interno ·<strong> Ambos</strong>: pasó por los dos revisores, aquí
           aplica la comparación de rondas · La columna <em>Dif.</em> muestra cuántas rondas más tuvo un lado, solo para
           tickets <em>Ambos</em>.
         </p>
@@ -303,7 +303,7 @@ export function HorasEstadoSection({ timelineTickets }) {
           <div>
             <CardTitle className="text-base font-bold">⏱️ Horas Estimadas por Estado</CardTitle>
             <p className="text-xs text-muted-foreground mt-1">
-              Tickets de {HORAS_TARGET_DEVS.join(", ")} — estimado vs. tiempo restante en Jira.
+              Tickets de {HORAS_TARGET_DEVS.join(", ")}, estimado vs. tiempo restante en Jira.
             </p>
           </div>
           <div className="flex items-center gap-3 text-sm">
@@ -315,8 +315,8 @@ export function HorasEstadoSection({ timelineTickets }) {
         </div>
       </CardHeader>
       <CardContent className="px-4 pb-4 pt-4 space-y-3">
-         <div className="overflow-x-auto rounded-md border">
-           <table className="w-full text-sm min-w-[800px]">
+        <div className="overflow-x-auto rounded-md border">
+          <table className="w-full text-sm min-w-[800px]">
             <thead>
               <tr className="bg-muted/50 text-xs text-muted-foreground uppercase">
                 <th className="px-3 py-2 text-left font-medium">Estado</th>
@@ -360,12 +360,12 @@ export function HorasEstadoSection({ timelineTickets }) {
                                     −{Math.round((dg.estimado - dg.restante) * 10) / 10}h
                                   </span>
                                 ) : (
-                                  <span className="text-muted-foreground/50">—</span>
+                                  <span className="text-muted-foreground/50">N/A</span>
                                 )}
                               </span>
                             </div>
                           ) : (
-                            <span className="text-muted-foreground/30">—</span>
+                            <span className="text-muted-foreground/30">N/A</span>
                           )}
                         </td>
                       );
@@ -437,7 +437,7 @@ export function HorasEstadoSection({ timelineTickets }) {
               <div className={`rounded-md border p-3 ${g.headerCls} space-y-2`}>
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-sm">
-                    {g.icon} {g.label} — {g.tickets.length} ticket{g.tickets.length !== 1 ? "s" : ""}
+                    {g.icon} {g.label}, {g.tickets.length} ticket{g.tickets.length !== 1 ? "s" : ""}
                   </span>
                   <button
                     className="text-xs text-muted-foreground hover:text-foreground"
@@ -445,8 +445,8 @@ export function HorasEstadoSection({ timelineTickets }) {
                     ✕ Cerrar
                   </button>
                 </div>
-                 <div className="overflow-x-auto rounded border bg-background">
-                   <table className="w-full text-xs min-w-[640px]">
+                <div className="overflow-x-auto rounded border bg-background">
+                  <table className="w-full text-xs min-w-[640px]">
                     <thead>
                       <tr className="bg-muted/50 text-[10px] text-muted-foreground uppercase">
                         <th className="px-2 py-1.5 text-left">Ticket</th>
@@ -481,7 +481,7 @@ export function HorasEstadoSection({ timelineTickets }) {
                                   {t.horasRestantes}h
                                 </span>
                               ) : (
-                                <span className="text-muted-foreground/50">—</span>
+                                <span className="text-muted-foreground/50">N/A</span>
                               )}
                             </td>
                             <td className="px-2 py-1.5 text-center">
@@ -490,7 +490,7 @@ export function HorasEstadoSection({ timelineTickets }) {
                                   {pct}%
                                 </span>
                               ) : (
-                                <span className="text-muted-foreground/50">—</span>
+                                <span className="text-muted-foreground/50">N/A</span>
                               )}
                             </td>
                           </tr>
@@ -579,7 +579,7 @@ export function RebotesQASection({ timelineTickets }) {
                 </Tooltip>
                 <span className="w-20 text-left text-muted-foreground truncate">{t.assignee?.split(" ")[0]}</span>
                 <span className="w-24 text-muted-foreground">
-                  {t.revInterno !== "N/A" ? t.revInterno?.split(" ")[0] : "—"}
+                  {t.revInterno !== "N/A" ? t.revInterno?.split(" ")[0] : "N/A"}
                 </span>
                 <span className={`w-20 text-center font-semibold ${rebotes > 0 ? "text-red-600" : "text-green-600"}`}>
                   {rebotes > 0 ? `${rebotes} rebote${rebotes !== 1 ? "s" : ""}` : "✓ OK"}
@@ -633,17 +633,17 @@ function TipoTabla({ tiposData, totalUniverso, modColorMap, labelTotal }) {
         })}
       </div>
 
-               <div className="rounded-lg border overflow-hidden overflow-x-auto">
-         <table className="w-full text-xs min-w-[640px]">
-           <thead className="bg-muted/50">
-             <tr>
-               <th className="text-left px-3 py-2 font-medium text-muted-foreground">Tipo</th>
-               <th className="text-center px-3 py-2 font-medium text-muted-foreground">Total</th>
-               <th className="text-center px-3 py-2 font-medium text-muted-foreground">% de {labelTotal}</th>
-               <th className="text-left px-3 py-2 font-medium text-muted-foreground w-32">Barra</th>
-               <th className="text-left px-3 py-2 font-medium text-muted-foreground">Módulos principales</th>
-             </tr>
-           </thead>
+      <div className="rounded-lg border overflow-hidden overflow-x-auto">
+        <table className="w-full text-xs min-w-[640px]">
+          <thead className="bg-muted/50">
+            <tr>
+              <th className="text-left px-3 py-2 font-medium text-muted-foreground">Tipo</th>
+              <th className="text-center px-3 py-2 font-medium text-muted-foreground">Total</th>
+              <th className="text-center px-3 py-2 font-medium text-muted-foreground">% de {labelTotal}</th>
+              <th className="text-left px-3 py-2 font-medium text-muted-foreground w-32">Barra</th>
+              <th className="text-left px-3 py-2 font-medium text-muted-foreground">Módulos principales</th>
+            </tr>
+          </thead>
           <tbody className="divide-y">
             {tiposEntries.map(([tipo, d]) => {
               const c = tipoColor(tipo);
@@ -742,21 +742,21 @@ function TipoTabla({ tiposData, totalUniverso, modColorMap, labelTotal }) {
                 ))}
               </div>
 
-               <details>
-                 <summary className="text-xs text-muted-foreground hover:text-foreground cursor-pointer select-none">
-                   Ver los {d.total} tickets ▶
-                 </summary>
-                 <div className="mt-2 rounded-lg border overflow-hidden overflow-x-auto">
-                   <table className="w-full text-xs min-w-[640px]">
-                     <thead className="bg-muted/40">
-                       <tr>
-                         <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Ticket</th>
-                         <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Módulo</th>
-                         <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Dev</th>
-                         <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Estado</th>
-                         <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Resumen</th>
-                       </tr>
-                     </thead>
+              <details>
+                <summary className="text-xs text-muted-foreground hover:text-foreground cursor-pointer select-none">
+                  Ver los {d.total} tickets ▶
+                </summary>
+                <div className="mt-2 rounded-lg border overflow-hidden overflow-x-auto">
+                  <table className="w-full text-xs min-w-[640px]">
+                    <thead className="bg-muted/40">
+                      <tr>
+                        <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Ticket</th>
+                        <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Módulo</th>
+                        <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Dev</th>
+                        <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Estado</th>
+                        <th className="text-left px-3 py-1.5 font-medium text-muted-foreground">Resumen</th>
+                      </tr>
+                    </thead>
                     <tbody className="divide-y">
                       {modsEntries.flatMap(([mod, mdata]) =>
                         mdata.tickets.map((tk) => (
@@ -905,7 +905,9 @@ export function ModuloPorTipoSection({ moduloStats }) {
               <span>📝</span> Análisis en texto
             </p>
             {parrafos.map((p, i) => (
-              <p key={i} className="text-sm text-foreground leading-relaxed">
+              <p
+                key={`${p.slice(0, 40).replace(/[^a-z0-9]/gi, "")}--${i}`}
+                className="text-sm text-foreground leading-relaxed">
                 {p.split(/\*\*(.+?)\*\*/g).map((part, j) =>
                   j % 2 === 1 ? (
                     <strong key={j} className="font-semibold text-foreground">

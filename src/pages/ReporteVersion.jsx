@@ -1,6 +1,6 @@
 import { useReporte } from "../hooks/useReporte";
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { KpiCard } from "@/pages/reporte/reportHelpers";
@@ -17,6 +17,7 @@ import DevStatsSection from "@/pages/reporte/DevStatsSection";
 import TimelineSectionImported from "@/pages/reporte/TimelineSection";
 import PausasSection from "@/pages/reporte/PausasSection";
 import { PanelLeftOpen, RefreshCw } from "lucide-react";
+import { useEffect } from "react";
 
 const DONE_RE = /done|cerrado|finalizado|completado/i;
 
@@ -24,7 +25,7 @@ function ReporteSkeleton() {
   return (
     <div className="space-y-6 p-6">
       <div className="flex flex-col lg:flex-row items-stretch gap-2">
-        <Card className="border-l-4 border-l-primary lg:w-48 flex-shrink-0">
+        <Card className="lg:w-48 flex-shrink-0">
           <CardContent className="pt-4 pb-3 px-4 space-y-2">
             <Skeleton className="h-3 w-24" />
             <Skeleton className="h-8 w-16" />
@@ -35,7 +36,7 @@ function ReporteSkeleton() {
           <Skeleton className="h-3 w-40" />
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {[1, 2, 3, 4].map((i) => (
-              <Card key={i} className="border-l-4">
+              <Card key={`skeleton-card-${i}`}>
                 <CardContent className="pt-4 pb-3 px-4 space-y-2">
                   <Skeleton className="h-3 w-20" />
                   <Skeleton className="h-8 w-12" />
@@ -48,7 +49,7 @@ function ReporteSkeleton() {
       </div>
       <div className="space-y-4">
         {[1, 2, 3, 4].map((i) => (
-          <Card key={i}>
+          <Card key={`skeleton-section-${i}`}>
             <CardContent className="pt-6 pb-4 px-4 space-y-3">
               <Skeleton className="h-5 w-48" />
               <Skeleton className="h-3 w-full" />
@@ -132,7 +133,7 @@ export default function ReporteVersion({ sidebarOpen, setSidebarOpen }) {
         <button
           onClick={() => setSidebarOpen((v) => !v)}
           aria-label="Abrir panel"
-          className="h-8 w-8 bg-primary/10 hover:bg-primary/20 text-primary rounded-md shadow-sm ring-1 ring-primary/25 flex items-center justify-center flex-shrink-0">
+          className="size-8 bg-primary/10 hover:bg-primary/20 text-primary rounded-md shadow-sm ring-1 ring-primary/25 flex items-center justify-center flex-shrink-0">
           <PanelLeftOpen size={16} />
         </button>
         <h1 className="text-base font-bold tracking-tight">📈 Reporte de Versión</h1>
@@ -144,7 +145,7 @@ export default function ReporteVersion({ sidebarOpen, setSidebarOpen }) {
       </header>
       {/* Header escritorio: título + refresh */}
       <div className="hidden lg:flex items-center justify-between px-4 pt-4">
-        <h1 className="text-lg font-bold">📈 Reporte de Versión</h1>
+        <h1 className="text-lg font-semibold">📈 Reporte de Version</h1>
         <div>
           <Button size="sm" onClick={handleRefresh} disabled={refreshing || loading}>
             {refreshing || loading ? "Recargando..." : "Refrescar"}
@@ -153,10 +154,10 @@ export default function ReporteVersion({ sidebarOpen, setSidebarOpen }) {
       </div>
       <div className="space-y-6 p-3 sm:p-6">
         <div className="flex flex-col lg:flex-row items-stretch gap-2">
-          <Card className="border-l-4 border-l-primary lg:w-48 flex-shrink-0">
+          <Card className="shadow-sm lg:w-48 flex-shrink-0">
             <CardContent className="pt-4 pb-3 px-4">
               <p className="text-xs text-muted-foreground uppercase tracking-wider">🎫 Total Tickets</p>
-              <p className="text-3xl font-extrabold mt-1">{t.total || 0}</p>
+              <p className="text-3xl font-semibold mt-1">{t.total || 0}</p>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {t.activos || 0} activos · {t.finalizados || 0} finalizados
               </p>
@@ -314,7 +315,7 @@ export default function ReporteVersion({ sidebarOpen, setSidebarOpen }) {
               Cargando datos detallados (timeline, desarrolladores, revisores)...
             </div>
             {[1, 2, 3].map((i) => (
-              <Card key={i}>
+              <Card key={`changelog-skel-${i}`}>
                 <CardContent className="pt-6 pb-4 px-4 space-y-3">
                   <Skeleton className="h-5 w-48" />
                   <Skeleton className="h-3 w-full" />

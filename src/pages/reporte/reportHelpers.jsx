@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 export function fmtHoras(h) {
-  if (!h || h <= 0) return "—";
+  if (!h || h <= 0) return "N/A";
   if (h < 1) return `${Math.round(h * 60)}min`;
   return `${Math.round(h * 10) / 10}h`;
 }
@@ -45,4 +45,4 @@ export function KpiCard({ icon, label, value, sub, color = "border-l-primary" })
   );
 }
 
-export default {};
+// no default export needed

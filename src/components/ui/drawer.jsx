@@ -5,48 +5,41 @@ import { Dialog as DrawerPrimitive } from "radix-ui";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { XIcon } from "lucide-react";
 
-const Drawer = React.forwardRef(function Drawer(props, ref) {
-  return <DrawerPrimitive.Root ref={ref} data-slot="drawer" {...props} />;
-});
+function Drawer(props) {
+  return <DrawerPrimitive.Root data-slot="drawer" {...props} />;
+}
 
-const DrawerTrigger = React.forwardRef(function DrawerTrigger(props, ref) {
-  return <DrawerPrimitive.Trigger ref={ref} data-slot="drawer-trigger" {...props} />;
-});
+function DrawerTrigger(props) {
+  return <DrawerPrimitive.Trigger data-slot="drawer-trigger" {...props} />;
+}
 
-const DrawerClose = React.forwardRef(function DrawerClose(props, ref) {
-  return <DrawerPrimitive.Close ref={ref} data-slot="drawer-close" {...props} />;
-});
+function DrawerClose(props) {
+  return <DrawerPrimitive.Close data-slot="drawer-close" {...props} />;
+}
 
-const DrawerPortal = React.forwardRef(function DrawerPortal(props, ref) {
-  return <DrawerPrimitive.Portal ref={ref} data-slot="drawer-portal" {...props} />;
-});
+function DrawerPortal(props) {
+  return <DrawerPrimitive.Portal data-slot="drawer-portal" {...props} />;
+}
 
-const DrawerOverlay = React.forwardRef(function DrawerOverlay({ className, ...props }, ref) {
+function DrawerOverlay({ className, ...props }) {
   return (
     <DrawerPrimitive.Overlay
-      ref={ref}
       data-slot="drawer-overlay"
       className={cn(
-        // prevent intercepting pointer events when closed; allow when open
         "fixed inset-0 z-40 bg-black/20 pointer-events-none data-[state=open]:pointer-events-auto data-open:animate-in data-open:fade-in-0",
         className,
       )}
       {...props}
     />
   );
-});
+}
 
-const DrawerContent = React.forwardRef(function DrawerContent(
-  { className, children, side = "right", showCloseButton = true, ...props },
-  ref,
-) {
+function DrawerContent({ className, children, side = "right", showCloseButton = true, ...props }) {
   return (
     <DrawerPortal>
       <DrawerOverlay />
       <DrawerPrimitive.Content
-        ref={ref}
         data-slot="drawer-content"
         data-side={side}
         className={cn(
@@ -74,7 +67,7 @@ const DrawerContent = React.forwardRef(function DrawerContent(
       </DrawerPrimitive.Content>
     </DrawerPortal>
   );
-});
+}
 
 function DrawerHeader({ className, ...props }) {
   return <div data-slot="drawer-header" className={cn("flex flex-col gap-0.5 p-4", className)} {...props} />;
@@ -84,29 +77,25 @@ function DrawerFooter({ className, ...props }) {
   return <div data-slot="drawer-footer" className={cn("mt-auto flex flex-col gap-2 p-4", className)} {...props} />;
 }
 
-const DrawerTitle = React.forwardRef(function DrawerTitle(props, ref) {
-  const { className, ...rest } = props;
+function DrawerTitle({ className, ...props }) {
   return (
     <DrawerPrimitive.Title
-      ref={ref}
       data-slot="drawer-title"
       className={cn("font-heading text-base font-medium text-foreground", className)}
-      {...rest}
+      {...props}
     />
   );
-});
+}
 
-const DrawerDescription = React.forwardRef(function DrawerDescription(props, ref) {
-  const { className, ...rest } = props;
+function DrawerDescription({ className, ...props }) {
   return (
     <DrawerPrimitive.Description
-      ref={ref}
       data-slot="drawer-description"
       className={cn("text-sm text-muted-foreground", className)}
-      {...rest}
+      {...props}
     />
   );
-});
+}
 
 export {
   Drawer,

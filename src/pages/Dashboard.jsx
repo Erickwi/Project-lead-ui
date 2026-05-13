@@ -68,11 +68,11 @@ export default function Dashboard({ sidebarOpen, setSidebarOpen }) {
               <button
                 onClick={() => setSidebarOpen((v) => !v)}
                 aria-label="Abrir panel"
-                className="mr-3 lg:hidden h-8 w-8 bg-primary/10 hover:bg-primary/20 text-primary rounded-md shadow-sm ring-1 ring-primary/25 flex items-center justify-center flex-shrink-0">
+                className="mr-3 lg:hidden size-8 bg-primary/10 hover:bg-primary/20 text-primary rounded-md shadow-sm ring-1 ring-primary/25 flex items-center justify-center flex-shrink-0">
                 <PanelLeftOpen size={16} />
               </button>
-              <h1 className="text-base sm:text-xl font-bold tracking-tight leading-tight flex items-center">
-                📊 Centro de Mando — Project Lead
+              <h1 className="text-base sm:text-xl font-semibold tracking-tight leading-tight flex items-center">
+                📊 Centro de Mando - Project Lead
               </h1>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5 truncate">
@@ -165,15 +165,15 @@ export default function Dashboard({ sidebarOpen, setSidebarOpen }) {
               {/* Dev cards skeleton */}
               <div className="space-y-3 mt-6">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="border rounded-lg overflow-hidden">
+                  <div key={`dev-skel-${i}`} className="border rounded-lg overflow-hidden">
                     <div className="flex items-center gap-3 px-4 py-3 bg-muted/30">
-                      <Skeleton className="h-8 w-8 rounded-full" />
+                      <Skeleton className="size-8 rounded-full" />
                       <Skeleton className="h-5 w-32" />
                       <Skeleton className="h-5 w-16 ml-auto rounded-full" />
                     </div>
                     <div className="px-4 py-3 space-y-2">
                       {[1, 2, 3].map((j) => (
-                        <div key={j} className="flex items-center gap-3">
+                        <div key={`dev-row-${i}-${j}`} className="flex items-center gap-3">
                           <Skeleton className="h-4 w-20" />
                           <Skeleton className="h-4 flex-1" />
                           <Skeleton className="h-5 w-16 rounded-full" />

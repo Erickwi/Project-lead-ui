@@ -2,7 +2,7 @@ import * as React from "react";
 import * as SwitchPrimitive from "@radix-ui/react-switch";
 import { cn } from "@/lib/utils";
 
-const Switch = React.forwardRef(function Switch({ className, checked, onCheckedChange, ...props }, ref) {
+function Switch({ className, checked, onCheckedChange, ref, ...props }) {
   return (
     <SwitchPrimitive.Root
       ref={ref}
@@ -22,6 +22,6 @@ const Switch = React.forwardRef(function Switch({ className, checked, onCheckedC
       />
     </SwitchPrimitive.Root>
   );
-});
+}
 
 export { Switch };

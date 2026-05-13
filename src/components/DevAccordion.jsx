@@ -9,9 +9,10 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
-// Listas de equipo (sincronizadas con v1.js)
-const EQUIPO_DEV = ["Jairo Proaño", "Jerson Andino", "Mateo Congo", "Erick Ramírez", "Fabio Enríquez"];
-const EQUIPO_QA = ["Diego Rosales", "Samuel López", "ALEXANDER ANDAGOYA", "Ana Cristina Catucuamba"];
+const EQUIPO_DEV = new Set(["Jairo Proaño", "Jerson Andino", "Mateo Congo", "Erick Ramírez", "Fabio Enríquez"]);
+const EQUIPO_QA = new Set(["Diego Rosales", "Samuel López", "ALEXANDER ANDAGOYA", "Ana Cristina Catucuamba"]);
+
+const QA_KEYWORDS_LOWER = new Set(["operativas", "pruebas"]);
 
 function loadStyle(horas) {
   if (horas > 32) return { badge: "bg-red-100 text-red-700 hover:bg-red-100", bar: "bg-red-500" };
@@ -24,7 +25,7 @@ function DevCard({ nombre, tickets, onUpdate }) {
   const totalHoras = tickets.reduce((s, t) => s + (t.horas || 0), 0);
   const style = loadStyle(totalHoras);
 
-  const sorted = [...tickets].sort((a, b) => a.priorityOrder - b.priorityOrder);
+  const sorted = tickets.toSorted((a, b) => a.priorityOrder - b.priorityOrder);
   const totalSubtasks = tickets.reduce((s, t) => s + (t.subtasks?.length || 0), 0);
   const totalItems = tickets.length + totalSubtasks;
 
@@ -85,7 +86,7 @@ export default function DevAccordion({ tickets, onUpdate, onUpdateDeployStatus, 
     const name = ticket.assignee;
     const st = ticket.status.toLowerCase();
 
-    if (EQUIPO_QA.includes(name) || st.includes("operativas") || st.includes("pruebas")) {
+    if (EQUIPO_QA.has(name) || QA_KEYWORDS_LOWER.has(st) || st.includes("operativas") || st.includes("pruebas")) {
       if (!qaMap[name]) qaMap[name] = [];
       qaMap[name].push(ticket);
     } else {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -23,6 +23,21 @@ const PAUSA_EMPTY = {
   fecha_fin: "",
   ticket_relacionado: "",
 };
+
+function PausaDateRange({ fecha_inicio, fecha_fin }) {
+  const [dateRange, setDateRange] = useState("");
+  useEffect(() => {
+    const parts = [];
+    if (fecha_inicio) {
+      parts.push(new Date(fecha_inicio).toLocaleDateString("es-ES", { day: "2-digit", month: "short" }));
+    }
+    if (fecha_fin) {
+      parts.push(`-> ${new Date(fecha_fin).toLocaleDateString("es-ES", { day: "2-digit", month: "short" })}`);
+    }
+    setDateRange(parts.length > 0 ? parts.join(" ") : fecha_inicio ? "?" : "-> en curso");
+  }, [fecha_inicio, fecha_fin]);
+  return <span suppressHydrationWarning>{dateRange}</span>;
+}
 
 export default function PausasSection({ pausas = [], crearPausa, eliminarPausa }) {
   const [form, setForm] = useState(PAUSA_EMPTY);
@@ -158,13 +173,7 @@ export default function PausasSection({ pausas = [], crearPausa, eliminarPausa }
                       )}
                       {(p.fecha_inicio || p.fecha_fin) && (
                         <span className="text-xs text-muted-foreground">
-                          📅{" "}
-                          {p.fecha_inicio
-                            ? new Date(p.fecha_inicio).toLocaleDateString("es-ES", { day: "2-digit", month: "short" })
-                            : "?"}{" "}
-                          {p.fecha_fin
-                            ? `→ ${new Date(p.fecha_fin).toLocaleDateString("es-ES", { day: "2-digit", month: "short" })}`
-                            : "→ en curso"}
+                          📅 <PausaDateRange fecha_inicio={p.fecha_inicio} fecha_fin={p.fecha_fin} />
                         </span>
                       )}
                     </div>
@@ -173,7 +182,7 @@ export default function PausasSection({ pausas = [], crearPausa, eliminarPausa }
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-6 w-6 text-muted-foreground hover:text-red-500 flex-shrink-0"
+                    className="size-6 text-muted-foreground hover:text-red-500 flex-shrink-0"
                     onClick={() => eliminarPausa(p.id)}
                     title="Eliminar">
                     🗑️

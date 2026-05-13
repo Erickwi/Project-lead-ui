@@ -36,8 +36,8 @@ export default function TimelineSection({ timelineTickets }) {
           onChange={(e) => setFiltro(e.target.value)}
           className="mb-3 h-8 text-xs"
         />
-         <div className="rounded-lg border overflow-x-auto max-h-96">
-           <table className="w-full text-xs whitespace-nowrap min-w-[800px]">
+        <div className="rounded-lg border overflow-x-auto max-h-96">
+          <table className="w-full text-xs whitespace-nowrap min-w-[800px]">
             <thead className="bg-background sticky top-0 z-20 shadow-sm">
               <tr>
                 <th className="text-left px-3 py-2 font-medium text-muted-foreground sticky left-0 bg-background z-30">
@@ -70,7 +70,7 @@ export default function TimelineSection({ timelineTickets }) {
                       {t.revInterno !== "N/A" ? (
                         <span className="text-blue-600">{t.revInterno}</span>
                       ) : (
-                        <span className="text-muted-foreground/40">—</span>
+                        <span className="text-muted-foreground/40">N/A</span>
                       )}
                     </td>
                     <td className="px-3 py-1.5 text-center">
@@ -88,16 +88,16 @@ export default function TimelineSection({ timelineTickets }) {
                           : t.retraso_dias < 0
                             ? `${t.retraso_dias}d`
                             : "0d"
-                        : "—"}
+                        : "N/A"}
                     </td>
                     <td className="px-3 py-1.5 text-center text-muted-foreground">
                       {t.duracion_real_dias !== null && t.duracion_real_dias !== undefined
                         ? `${t.duracion_real_dias}d`
-                        : "—"}
+                        : "N/A"}
                     </td>
                     {allStatuses.map((s) => (
                       <td key={s} className="px-3 py-1.5 text-center text-muted-foreground">
-                        {t.tiemposPorEstado?.[s] ? fmtHoras(t.tiemposPorEstado[s]) : "—"}
+                        {t.tiemposPorEstado?.[s] ? fmtHoras(t.tiemposPorEstado[s]) : "N/A"}
                       </td>
                     ))}
                   </tr>

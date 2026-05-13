@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useAppData } from "../context/AppDataContext";
 import { useNavigate } from "react-router-dom";
 import { useRecordatorios } from "../hooks/useRecordatorios";
@@ -50,6 +50,24 @@ function getTodayDate() {
 
 const EMPTY_FORM = { descripcion: "", prioridad: "Media", fecha: getTodayDate(), enviar_telegram: false };
 
+function SidebarDateDisplay({ fecha }) {
+  const [dateStr, setDateStr] = useState("");
+  useEffect(() => {
+    setDateStr(
+      new Date(fecha).toLocaleDateString("es-ES", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      }),
+    );
+  }, [fecha]);
+  return (
+    <span className="text-xs text-zinc-500" suppressHydrationWarning>
+      {dateStr}
+    </span>
+  );
+}
+
 function SortableItem({ rec, onEdit, onDelete }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: rec.id,
@@ -70,7 +88,15 @@ function SortableItem({ rec, onEdit, onDelete }) {
       style={style}
       {...attributes}
       {...listeners}
-      className={`bg-zinc-900 border-l-4 ${cfg.border} rounded-r-lg p-3 group transition-all hover:bg-zinc-800 cursor-grab active:cursor-grabbing touch-none`}>
+      role="button"
+      aria-label={`recordatorio-${rec.id}`}
+      tabIndex={0}
+      className={`bg-zinc-900 border-l-4 ${cfg.border} rounded-r-lg p-3 group transition-all hover:bg-zinc-800 cursor-grab active:cursor-grabbing touch-none`}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.stopPropagation();
+        }
+      }}>
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <p className="text-sm text-zinc-100 leading-snug break-all whitespace-pre-wrap max-h-20 overflow-auto">
@@ -87,7 +113,7 @@ function SortableItem({ rec, onEdit, onDelete }) {
               onEdit(rec);
             }}
             title="Editar"
-            className="h-6 w-6 text-zinc-400 hover:text-zinc-100 hover:bg-transparent cursor-pointer">
+            className="size-6 text-zinc-400 hover:text-zinc-100 hover:bg-transparent cursor-pointer">
             ✏️
           </Button>
           <Button
@@ -99,22 +125,14 @@ function SortableItem({ rec, onEdit, onDelete }) {
               onDelete(rec.id);
             }}
             title="Eliminar"
-            className="h-6 w-6 text-zinc-400 hover:text-red-400 hover:bg-transparent cursor-pointer">
+            className="size-6 text-zinc-400 hover:text-red-400 hover:bg-transparent cursor-pointer">
             🗑️
           </Button>
         </div>
       </div>
       <div className="flex items-center gap-2 mt-2">
         <Badge className={`text-xs font-semibold ${cfg.badge}`}>{rec.prioridad}</Badge>
-        {rec.fecha && (
-          <span className="text-xs text-zinc-500">
-            {new Date(rec.fecha).toLocaleDateString("es-ES", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-            })}
-          </span>
-        )}
+        {rec.fecha && <SidebarDateDisplay fecha={rec.fecha} />}
       </div>
     </div>
   );
@@ -142,7 +160,7 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
     }),
   );
 
-  const sortedRecordatorios = [...recordatorios].sort((a, b) => (a.posicion || 0) - (b.posicion || 0));
+  const sortedRecordatorios = recordatorios.toSorted((a, b) => (a.posicion || 0) - (b.posicion || 0));
   const [filterTelegram, setFilterTelegram] = useState(false);
   const displayRecordatorios = filterTelegram
     ? sortedRecordatorios.filter((r) => !!(r.enviar_telegram === true || Number(r.enviar_telegram) === 1))
@@ -211,7 +229,7 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
           <button
             onClick={() => onToggleCollapsed(false)}
             title="Mostrar panel"
-            className="w-8 h-8 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors">
+            className="size-8 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors">
             <ChevronRight size={16} />
           </button>
 
@@ -220,7 +238,7 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
             <button
               onClick={() => handleNavigate("/")}
               title="Dashboard"
-              className={`w-8 h-8 flex items-center justify-center rounded-md transition-colors ${
+              className={`size-8 flex items-center justify-center rounded-md transition-colors ${
                 currentPage === "dashboard"
                   ? "bg-primary text-primary-foreground"
                   : "text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800"
@@ -230,7 +248,7 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
             <button
               onClick={() => handleNavigate("/reporte")}
               title="Reporte"
-              className={`w-8 h-8 flex items-center justify-center rounded-md transition-colors ${
+              className={`size-8 flex items-center justify-center rounded-md transition-colors ${
                 currentPage === "reporte"
                   ? "bg-primary text-primary-foreground"
                   : "text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800"
@@ -240,7 +258,7 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
             <button
               onClick={() => handleNavigate("/sprint/frederick")}
               title="Sprint Frederick"
-              className={`w-8 h-8 flex items-center justify-center rounded-md transition-colors ${
+              className={`size-8 flex items-center justify-center rounded-md transition-colors ${
                 currentPage === "sprint"
                   ? "bg-primary text-primary-foreground"
                   : "text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800"
@@ -256,7 +274,7 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
                 openCreate();
               }}
               title="Nueva nota"
-              className="w-8 h-8 flex items-center justify-center rounded-md text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800 transition-colors">
+              className="size-8 flex items-center justify-center rounded-md text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800 transition-colors">
               <Plus size={15} />
             </button>
           </div>
@@ -300,7 +318,7 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
               <button
                 onClick={() => onToggleCollapsed(true)}
                 title="Ocultar panel"
-                className="w-7 h-7 flex items-center justify-center rounded text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800 transition-colors">
+                className="size-7 flex items-center justify-center rounded text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800 transition-colors">
                 <ChevronLeft size={15} />
               </button>
             </div>
@@ -308,7 +326,7 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
 
           {/* Header */}
           <div className="px-4 py-4 border-b border-zinc-800 flex items-center justify-between">
-            <h2 className="text-sm font-bold tracking-wider text-zinc-100 uppercase">📋 Notas & Recordatorios</h2>
+            <h2 className="text-sm font-semibold tracking-wider text-zinc-100 uppercase">📋 Notas y Recordatorios</h2>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
                 <Switch
@@ -332,11 +350,13 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
           <ScrollArea className="flex-1 p-3 overflow-y-auto">
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={sortedRecordatorios.map((r) => r.id)} strategy={verticalListSortingStrategy}>
-                <div className="space-y-2">
+                <div className="gap-y-2">
                   {loading && (
                     <div className="space-y-2 mt-2">
                       {[1, 2, 3, 4, 5].map((i) => (
-                        <div key={i} className="bg-zinc-900 border-l-4 border-l-zinc-700 rounded-r-lg p-3 space-y-2">
+                        <div
+                          key={`skeleton-${i}`}
+                          className="bg-zinc-900 border-l-4 border-l-zinc-700 rounded-r-lg p-3 space-y-2">
                           <Skeleton className="h-3 w-full bg-zinc-800/50" />
                           <Skeleton className="h-3 w-3/4 bg-zinc-800/50" />
                           <div className="flex items-center gap-2">
@@ -377,7 +397,7 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
 
           {/* Footer version */}
           <div className="px-4 py-3 border-t border-zinc-800">
-            <p className="text-xs text-zinc-600 text-center">{currentSprintTitle || "Sprint v— · Ecomex 360"}</p>
+            <p className="text-xs text-zinc-600 text-center">Sprint v - Ecomex 360</p>
           </div>
         </aside>
       )}
@@ -436,7 +456,7 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
                     type="checkbox"
                     checked={!!form.enviar_telegram}
                     onChange={(e) => setForm((f) => ({ ...f, enviar_telegram: e.target.checked }))}
-                    className="w-4 h-4"
+                    className="size-4"
                   />
                   <span className="text-zinc-300">Enviar por Telegram</span>
                 </label>

@@ -34,16 +34,17 @@ export function useRecordatorios() {
     );
   };
 
+  const TO_DELETE_KEY = "deletedRecordatoriosHistory:v1";
+
   const eliminar = async (id) => {
     const idNum = Number(id);
-    // Optimistic update: archive deleted item to localStorage history
     setRecordatorios(prev => {
       const toDelete = prev.find(r => Number(r.id) === idNum);
       if (toDelete) {
         try {
-          const hist = JSON.parse(localStorage.getItem('deletedRecordatoriosHistory') || '[]');
+          const hist = JSON.parse(localStorage.getItem(TO_DELETE_KEY) || '[]');
           hist.unshift({ ...toDelete, deletedAt: new Date().toISOString() });
-          localStorage.setItem('deletedRecordatoriosHistory', JSON.stringify(hist.slice(0, 100)));
+          localStorage.setItem(TO_DELETE_KEY, JSON.stringify(hist.slice(0, 100)));
         } catch (err) {
           console.error('Error archivando historial:', err.message);
         }
@@ -64,7 +65,7 @@ export function useRecordatorios() {
     const intOrden = orden.map(id => Number(id));
     // Actualizar estado inmediatamente (optimistic)
     setRecordatorios(prev => {
-      const sorted = [...prev].sort((a, b) => {
+      const sorted = prev.toSorted((a, b) => {
         const idxA = intOrden.indexOf(Number(a.id));
         const idxB = intOrden.indexOf(Number(b.id));
         return idxA - idxB;

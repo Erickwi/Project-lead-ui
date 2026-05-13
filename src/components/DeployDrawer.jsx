@@ -50,7 +50,10 @@ export default function DeployDrawer({ open, onClose, onOpenServerUpdate }) {
   const openWithSelectedForClient = (cliente) => {
     const dias = plan[cliente] || {};
     const all = Object.values(dias).flat();
-    const chosen = all.filter((t) => selected[t.key]).map((t) => ({ ...t, cliente_nombre: cliente }));
+    const chosen = all.reduce((acc, t) => {
+      if (selected[t.key]) acc.push({ ...t, cliente_nombre: cliente });
+      return acc;
+    }, []);
     if (chosen.length === 0) return; // nothing selected
     onOpenServerUpdate && onOpenServerUpdate(chosen);
   };
@@ -66,7 +69,7 @@ export default function DeployDrawer({ open, onClose, onOpenServerUpdate }) {
         <div className="flex items-center justify-between px-4 py-3 bg-primary text-primary-foreground flex-shrink-0">
           <div>
             <DrawerHeader className="text-left space-y-0">
-              <DrawerTitle className="text-primary-foreground font-bold text-lg">📅 Plan de Despliegue</DrawerTitle>
+              <DrawerTitle className="text-primary-foreground font-semibold text-lg">📅 Plan de Despliegue</DrawerTitle>
               <DrawerDescription className="text-primary-foreground/60 text-xs mt-0.5">
                 Tickets agrupados por cliente y día
               </DrawerDescription>
@@ -77,7 +80,7 @@ export default function DeployDrawer({ open, onClose, onOpenServerUpdate }) {
             size="icon"
             onClick={loadPlan}
             title="Recargar"
-            className="text-primary-foreground/60 hover:text-primary-foreground hover:bg-white/10 h-8 w-8">
+            className="size-8 text-primary-foreground/60 hover:text-primary-foreground hover:bg-white/10">
             🔄
           </Button>
         </div>
@@ -111,7 +114,7 @@ export default function DeployDrawer({ open, onClose, onOpenServerUpdate }) {
                     {/* Cabecera cliente */}
                     <div className="flex flex-wrap items-center gap-2 mb-3">
                       <div className="w-2 h-2 rounded-full bg-foreground/30 flex-shrink-0" />
-                      <h3 className="font-bold text-foreground text-sm flex-auto min-w-0 truncate">{cliente}</h3>
+                      <h3 className="font-semibold text-foreground text-sm flex-auto min-w-0 truncate">{cliente}</h3>
                       <div className="flex flex-wrap items-center gap-2">
                         <Badge variant="secondary" className="text-xs rounded-full">
                           {totalTickets} ticket{totalTickets !== 1 ? "s" : ""}
