@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useAppData } from "../context/AppDataContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PanelLeftOpen } from "lucide-react";
 
@@ -127,9 +128,13 @@ function RenderGroups({ title, groups, expandedMonth, expandedDate, toggleMonth,
                                   <div key={t.key}>
                                     <TicketRowSimple t={t} />
                                     {t.doneChange && (
-                                      <div className="px-6 pb-3 text-xs text-muted-foreground">
-                                        Estado: {t.doneChange.from} · {t.doneChange.to} ·{" "}
-                                        <DateDisplay isoString={t.doneChange.created} />
+                                      <div className="px-6 pb-3 text-xs text-muted-foreground flex items-center gap-2">
+                                        <div>
+                                          Estado: {t.doneChange.from} · {t.doneChange.to} · <DateDisplay isoString={t.doneChange.created} />
+                                        </div>
+                                        {t.doneChange.author && (
+                                          <Badge variant="destructive" className="ml-2 bg-red-600 text-white">{t.doneChange.author}</Badge>
+                                        )}
                                       </div>
                                     )}
                                   </div>
