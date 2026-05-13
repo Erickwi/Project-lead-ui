@@ -305,6 +305,22 @@ export default function ReporteVersion({ sidebarOpen, setSidebarOpen }) {
 
         <StatusDistribucion statusCounts={datosBasicos.statusCounts} />
         <ModuloPorTipoSection moduloStats={datosBasicos.moduloStats} />
+        {/* Nuevo: métrica de tickets sin observaciones y paso directo a finalizado */}
+        {datosChangelogs && (
+          <div className="mt-3">
+            <Card>
+              <CardContent className="pt-4 pb-3 px-4">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                  ⚠️ Sin observaciones — paso directo a Finalizado
+                </p>
+                <p className="text-2xl font-semibold mt-1">{datosChangelogs.singleStepNoCommentsCount || 0}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Tickets sin comentarios y con una sola transición a finalizado
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
         <QABreakdownSection qaBreakdown={datosBasicos.qaBreakdown} />
 
         {/* Secciones pesadas - se cargan progresivamente */}

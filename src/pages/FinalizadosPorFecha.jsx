@@ -130,10 +130,13 @@ function RenderGroups({ title, groups, expandedMonth, expandedDate, toggleMonth,
                                     {t.doneChange && (
                                       <div className="px-6 pb-3 text-xs text-muted-foreground flex items-center gap-2">
                                         <div>
-                                          Estado: {t.doneChange.from} · {t.doneChange.to} · <DateDisplay isoString={t.doneChange.created} />
+                                          Estado: {t.doneChange.from} · {t.doneChange.to} ·{" "}
+                                          <DateDisplay isoString={t.doneChange.created} />
                                         </div>
                                         {t.doneChange.author && (
-                                          <Badge variant="destructive" className="ml-2 bg-red-600 text-white">{t.doneChange.author}</Badge>
+                                          <Badge variant="destructive" className="ml-2 bg-red-600 text-white">
+                                            {t.doneChange.author}
+                                          </Badge>
                                         )}
                                       </div>
                                     )}
