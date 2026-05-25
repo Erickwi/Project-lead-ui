@@ -5,6 +5,7 @@ import DeployDrawer from "../components/DeployDrawer";
 import DeployNotificationModal from "../components/DeployNotificationModal";
 import ServerUpdateModal from "../components/ServerUpdateModal";
 import { useTickets } from "../hooks/useTickets";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,6 +14,7 @@ import { PanelLeftOpen } from "lucide-react";
 
 export default function Dashboard({ sidebarOpen, setSidebarOpen }) {
   const { tickets, doneTickets, loading, error, refetch, updateTicketInfo, updateDeployStatus } = useTickets();
+  const navigate = useNavigate();
   const { currentSprintTitle } = useAppData();
   const [drawerOpen, setDrawerOpen] = useState(false);
   // Release Notes removed per UX request
@@ -92,7 +94,7 @@ export default function Dashboard({ sidebarOpen, setSidebarOpen }) {
               <Badge
                 variant="outline"
                 className="rounded-full text-xs text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50"
-                onClick={() => (window.location.href = "/finalizados")}>
+                onClick={() => navigate('/finalizados')}> 
                 {doneTickets.length} finalizados →
               </Badge>
             )}
