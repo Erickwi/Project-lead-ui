@@ -94,7 +94,7 @@ export default function Dashboard({ sidebarOpen, setSidebarOpen }) {
               <Badge
                 variant="outline"
                 className="rounded-full text-xs text-muted-foreground whitespace-nowrap cursor-pointer hover:bg-muted/50"
-                onClick={() => navigate('/finalizados')}> 
+                onClick={() => navigate("/finalizados")}>
                 {doneTickets.length} finalizados →
               </Badge>
             )}
