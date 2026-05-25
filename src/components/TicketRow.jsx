@@ -49,6 +49,7 @@ export default function TicketRow({ ticket, onUpdate }) {
   const [mostrarClienteDespliegue, setMostrarClienteDespliegue] = useState(
     () => ticket.mostrarClienteDespliegue !== false,
   );
+  const [servidor, setServidor] = useState(() => ticket.servidor || "");
 
   const prevTicketRef = useRef(null);
   useEffect(() => {
@@ -57,6 +58,7 @@ export default function TicketRow({ ticket, onUpdate }) {
       setDia(normalizeDate(ticket.dia_despliegue));
       setOtrasVersiones(ticket.otrasVersiones || "");
       setMostrarClienteDespliegue(ticket.mostrarClienteDespliegue !== false);
+      setServidor(ticket.servidor || "");
     }
     prevTicketRef.current = ticket;
   }, [ticket]);
@@ -68,6 +70,7 @@ export default function TicketRow({ ticket, onUpdate }) {
       estado_entrega: ticket.estado_entrega,
       otrasVersiones: updates.otrasVersiones,
       mostrarClienteDespliegue: updates.mostrarClienteDespliegue,
+      servidor: updates.servidor,
     });
   };
 
@@ -84,13 +87,24 @@ export default function TicketRow({ ticket, onUpdate }) {
 
   const handleChangeOtrasVersiones = (val) => {
     setOtrasVersiones(val);
-    persist({ cliente_nombre: cliente, dia_despliegue: dia, otrasVersiones: val, mostrarClienteDespliegue });
+    persist({ cliente_nombre: cliente, dia_despliegue: dia, otrasVersiones: val, mostrarClienteDespliegue, servidor });
   };
 
   const handleChangeMostrarClienteDespliegue = (val) => {
     const newVal = val === "si";
     setMostrarClienteDespliegue(newVal);
-    persist({ cliente_nombre: cliente, dia_despliegue: dia, otrasVersiones, mostrarClienteDespliegue: newVal });
+    persist({
+      cliente_nombre: cliente,
+      dia_despliegue: dia,
+      otrasVersiones,
+      mostrarClienteDespliegue: newVal,
+      servidor,
+    });
+  };
+
+  const handleChangeServidor = (val) => {
+    setServidor(val);
+    persist({ cliente_nombre: cliente, dia_despliegue: dia, otrasVersiones, mostrarClienteDespliegue, servidor: val });
   };
 
   const badgeClass = PRIORITY_BADGE[ticket.priority] || PRIORITY_BADGE.Medium;
@@ -157,6 +171,12 @@ export default function TicketRow({ ticket, onUpdate }) {
             title={`Otras versiones: ${ticket.otrasVersiones}`}>
             📌 {ticket.otrasVersiones}
           </span>
+        )}
+        {/* Servidor desplegado (compact) */}
+        {ticket.servidor && (
+          <Badge variant="outline" className="text-xs flex-shrink-0 ml-2">
+            🖥️ {ticket.servidor}
+          </Badge>
         )}
 
         {/* Fecha + urgencia */}
@@ -242,6 +262,12 @@ export default function TicketRow({ ticket, onUpdate }) {
                   </SelectContent>
                 </Select>
                 <DatePicker value={dia} onChange={handleChangeDia} placeholder="Fecha de despliegue..." />
+                <Input
+                  placeholder="Servidor (ej: prod-web-1)"
+                  value={servidor}
+                  onChange={(e) => handleChangeServidor(e.target.value)}
+                  className="mt-2 h-8 text-sm"
+                />
               </div>
             )}
           </div>

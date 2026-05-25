@@ -28,6 +28,11 @@ function SprintTicketRow({ ticket, tag }) {
         </div>
         <div className="flex items-center gap-2 mt-0.5 flex-wrap">
           <span className="text-xs text-muted-foreground">{ticket.assignee}</span>
+          {ticket.servidor && (
+            <Badge variant="outline" className="text-xs flex-shrink-0">
+              🖥️ {ticket.servidor}
+            </Badge>
+          )}
           {ticket.cliente_nombre && (
             <>
               <span className="text-xs text-muted-foreground/40">·</span>
@@ -204,9 +209,7 @@ function DoneByDateBlock({ title, grouped, emptyMsg }) {
                               {g.items.map((t) => (
                                 <div key={t.key}>
                                   <SprintTicketRow ticket={t} tag="done" />
-                                  {t.doneChange && (
-                                    <DoneChangeInfo doneChange={t.doneChange} />
-                                  )}
+                                  {t.doneChange && <DoneChangeInfo doneChange={t.doneChange} />}
                                 </div>
                               ))}
                             </div>

@@ -21,7 +21,13 @@ function TicketRowSimple({ t }) {
           <span className="text-sm truncate">{t.summary}</span>
         </div>
         <div className="text-xs text-muted-foreground mt-1">
-          {t.assignee} {t.cliente_nombre ? ` · 🏢 ${t.cliente_nombre}` : ""} · {t.priority}
+          {t.assignee} {t.cliente_nombre ? ` · 🏢 ${t.cliente_nombre}` : ""}
+          {t.servidor && (
+            <Badge variant="outline" className="text-xs ml-2">
+              🖥️ {t.servidor}
+            </Badge>
+          )}
+          <span className="ml-2">· {t.priority}</span>
         </div>
       </div>
       <div className="text-xs text-muted-foreground">{t.status}</div>
