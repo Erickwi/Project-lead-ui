@@ -1,4 +1,6 @@
 @import "@fontsource-variable/geist";
+@import "@fontsource-variable/outfit";
+@import "@fontsource/dm-serif-display";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -17,11 +19,9 @@ body,
     padding: 0;
 }
 
-/* Scrollbar personalizado para el sidebar y drawer (más delgado y acorde a la paleta) */
-/* vertical width and horizontal height */
 ::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
+    width: 5px;
+    height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -38,85 +38,49 @@ body,
     background: color-mix(in srgb, var(--primary) 75%, black 25%);
 }
 
-/* Firefox: thinner scrollbars and themed color */
 * {
     scrollbar-width: thin;
     scrollbar-color: var(--primary) transparent;
 }
 
 @layer base {
-    .theme {
-        --font-heading: var(--font-sans);
-        --font-sans: 'Geist Variable', sans-serif;
-    }
-
     :root {
-        --background: oklch(1 0 0);
-        --foreground: oklch(0.145 0 0);
-        --card: oklch(1 0 0);
-        --card-foreground: oklch(0.145 0 0);
-        --popover: oklch(1 0 0);
-        --popover-foreground: oklch(0.145 0 0);
-        --primary: oklch(0.205 0 0);
-        --primary-foreground: oklch(0.985 0 0);
-        --secondary: oklch(0.97 0 0);
-        --secondary-foreground: oklch(0.205 0 0);
-        --muted: oklch(0.97 0 0);
-        --muted-foreground: oklch(0.556 0 0);
-        --accent: oklch(0.97 0 0);
-        --accent-foreground: oklch(0.205 0 0);
-        --destructive: oklch(0.577 0.245 27.325);
-        --border: oklch(0.922 0 0);
-        --input: oklch(0.922 0 0);
-        --ring: oklch(0.708 0 0);
-        --chart-1: oklch(0.87 0 0);
-        --chart-2: oklch(0.556 0 0);
-        --chart-3: oklch(0.439 0 0);
-        --chart-4: oklch(0.371 0 0);
-        --chart-5: oklch(0.269 0 0);
-        --radius: 0.625rem;
-        --sidebar: oklch(0.985 0 0);
-        --sidebar-foreground: oklch(0.145 0 0);
-        --sidebar-primary: oklch(0.205 0 0);
-        --sidebar-primary-foreground: oklch(0.985 0 0);
-        --sidebar-accent: oklch(0.97 0 0);
-        --sidebar-accent-foreground: oklch(0.205 0 0);
-        --sidebar-border: oklch(0.922 0 0);
-        --sidebar-ring: oklch(0.708 0 0);
-    }
+        --font-heading: 'DM Serif Display', serif;
+        --font-sans: 'Outfit Variable', 'Geist Variable', sans-serif;
 
-    .dark {
-        --background: oklch(0.145 0 0);
-        --foreground: oklch(0.985 0 0);
-        --card: oklch(0.205 0 0);
-        --card-foreground: oklch(0.985 0 0);
-        --popover: oklch(0.205 0 0);
-        --popover-foreground: oklch(0.985 0 0);
-        --primary: oklch(0.922 0 0);
-        --primary-foreground: oklch(0.205 0 0);
-        --secondary: oklch(0.269 0 0);
-        --secondary-foreground: oklch(0.985 0 0);
-        --muted: oklch(0.269 0 0);
-        --muted-foreground: oklch(0.708 0 0);
-        --accent: oklch(0.269 0 0);
-        --accent-foreground: oklch(0.985 0 0);
-        --destructive: oklch(0.704 0.191 22.216);
-        --border: oklch(1 0 0 / 10%);
-        --input: oklch(1 0 0 / 15%);
-        --ring: oklch(0.556 0 0);
-        --chart-1: oklch(0.87 0 0);
-        --chart-2: oklch(0.556 0 0);
-        --chart-3: oklch(0.439 0 0);
-        --chart-4: oklch(0.371 0 0);
-        --chart-5: oklch(0.269 0 0);
-        --sidebar: oklch(0.205 0 0);
-        --sidebar-foreground: oklch(0.985 0 0);
-        --sidebar-primary: oklch(0.488 0.243 264.376);
-        --sidebar-primary-foreground: oklch(0.985 0 0);
-        --sidebar-accent: oklch(0.269 0 0);
-        --sidebar-accent-foreground: oklch(0.985 0 0);
-        --sidebar-border: oklch(1 0 0 / 10%);
-        --sidebar-ring: oklch(0.556 0 0);
+        --background: oklch(0.965 0.008 260);
+        --foreground: oklch(0.15 0.04 265);
+        --card: oklch(1 0 0);
+        --card-foreground: oklch(0.15 0.04 265);
+        --popover: oklch(1 0 0);
+        --popover-foreground: oklch(0.15 0.04 265);
+        --primary: oklch(0.55 0.22 265);
+        --primary-foreground: oklch(0.98 0 0);
+        --secondary: oklch(0.92 0.015 260);
+        --secondary-foreground: oklch(0.25 0.06 265);
+        --muted: oklch(0.94 0.01 260);
+        --muted-foreground: oklch(0.55 0.03 265);
+        --accent: oklch(0.7 0.18 85);
+        --accent-foreground: oklch(0.15 0.04 265);
+        --accent-blue: oklch(0.65 0.15 240);
+        --destructive: oklch(0.6 0.22 25);
+        --border: oklch(0.88 0.015 260);
+        --input: oklch(0.88 0.015 260);
+        --ring: oklch(0.55 0.22 265);
+        --chart-1: oklch(0.55 0.22 265);
+        --chart-2: oklch(0.6 0.15 210);
+        --chart-3: oklch(0.7 0.18 85);
+        --chart-4: oklch(0.5 0.15 300);
+        --chart-5: oklch(0.4 0.2 180);
+        --radius: 0.75rem;
+        --sidebar: oklch(0.11 0.03 265);
+        --sidebar-foreground: oklch(0.85 0.01 265);
+        --sidebar-primary: oklch(0.55 0.22 265);
+        --sidebar-primary-foreground: oklch(0.98 0 0);
+        --sidebar-accent: oklch(0.7 0.18 85);
+        --sidebar-accent-foreground: oklch(0.15 0.04 265);
+        --sidebar-border: oklch(0.18 0.03 265);
+        --sidebar-ring: oklch(0.55 0.22 265);
     }
 
     * {
@@ -130,10 +94,9 @@ body,
     }
 
     html {
-        font-family: 'Geist Variable', sans-serif;
+        font-family: 'Outfit Variable', 'Geist Variable', sans-serif;
     }
 
-    /* Mobile responsive improvements */
     @media (max-width: 640px) {
         .container {
             padding-left: 0.75rem;
@@ -141,14 +104,11 @@ body,
         }
     }
 
-    /* Ensure tables don't break layout */
     table {
         min-width: 100%;
     }
 
-    /* Better touch targets on mobile */
     @media (max-width: 768px) {
-
         button,
         a {
             min-height: 36px;
@@ -156,9 +116,150 @@ body,
         }
     }
 
-    /* Exceptions: some tiny UI controls (Switch) should not be forced to 36px */
     .no-min-size {
         min-height: unset !important;
         min-width: unset !important;
     }
+}
+
+@layer components {
+    .navy-card {
+        @apply bg-white rounded-xl border border-blue-100/60 shadow-sm shadow-blue-900/5;
+    }
+
+    .navy-card-hover {
+        @apply navy-card transition-all duration-200 hover:shadow-md hover:shadow-blue-900/10 hover:border-blue-200/80;
+    }
+
+    .navy-gradient-text {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .navy-divider {
+        @apply h-px bg-gradient-to-r from-transparent via-blue-200 to-transparent;
+    }
+
+    .ocean-glow {
+        box-shadow: 0 0 20px rgba(37, 99, 235, 0.1), 0 0 40px rgba(37, 99, 235, 0.05);
+    }
+
+    .sidebar-link {
+        @apply relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
+               text-blue-200/60 hover:text-blue-100
+               hover:bg-white/[0.06] transition-all duration-200;
+    }
+
+    .sidebar-link.active {
+        @apply text-white bg-blue-600/20 before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2
+               before:w-0.5 before:h-6 before:bg-blue-500 before:rounded-full;
+    }
+
+    .page-header {
+        @apply relative overflow-hidden bg-gradient-to-br from-white via-blue-50/40 to-white
+               border-b border-blue-100/50 px-6 py-4;
+    }
+
+    .page-header::after {
+        content: '';
+        @apply absolute inset-0 pointer-events-none;
+        background: radial-gradient(ellipse 80% 60% at 0% 50%, rgba(37, 99, 235, 0.04) 0%, transparent 100%);
+    }
+
+    .btn-primary {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold
+               text-white bg-gradient-to-br from-blue-600 to-blue-700
+               hover:from-blue-500 hover:to-blue-600
+               shadow-sm shadow-blue-900/20 hover:shadow-md hover:shadow-blue-900/30
+               active:scale-[0.97] transition-all duration-150;
+    }
+
+    .btn-ghost {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium
+               text-blue-700 hover:text-blue-800 hover:bg-blue-50
+               active:scale-[0.97] transition-all duration-150;
+    }
+
+    .btn-outline {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium
+               text-blue-700 border border-blue-200 bg-white/80
+               hover:bg-blue-50 hover:border-blue-300
+               active:scale-[0.97] transition-all duration-150;
+    }
+
+    .stat-value {
+        @apply text-2xl font-bold tracking-tight;
+        font-family: 'DM Serif Display', serif;
+    }
+
+    .section-title {
+        @apply text-xs font-semibold uppercase tracking-[0.15em] text-blue-400;
+    }
+
+    .badge-blue {
+        @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold
+               bg-blue-50 text-blue-700 border border-blue-200;
+    }
+
+    .badge-amber {
+        @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold
+               bg-amber-50 text-amber-700 border border-amber-200;
+    }
+
+    .badge-green {
+        @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold
+               bg-emerald-50 text-emerald-700 border border-emerald-200;
+    }
+}
+
+@layer utilities {
+    .text-balance {
+        text-wrap: balance;
+    }
+}
+
+@keyframes fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slide-in-right {
+    from {
+        opacity: 0;
+        transform: translateX(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse-soft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.animate-fade-in-up {
+    animation: fade-in-up 0.5s ease-out both;
+}
+
+.animate-fade-in {
+    animation: fade-in 0.4s ease-out both;
+}
+
+.animate-slide-in-right {
+    animation: slide-in-right 0.4s ease-out both;
 }

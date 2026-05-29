@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import api from "../api/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PanelLeftOpen } from "lucide-react";
+import { PanelLeftOpen, Activity, RefreshCw } from "lucide-react";
 
 const DONE_RE = /done|cerrado|finalizado|completado/i;
 
@@ -14,28 +14,29 @@ function ticketUrl(key) {
 
 function StatusBadge({ status }) {
   const s = (status || "").toUpperCase();
-  let cls = "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ";
-  if (DONE_RE.test(s) || s.includes("FINALIZADO")) cls += "bg-emerald-500 text-white";
+  let cls = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ";
+  if (DONE_RE.test(s) || s.includes("FINALIZADO")) cls += "bg-emerald-500/20 text-emerald-600 border border-emerald-200";
   else if (s.includes("DESARROLLO") || s.includes("PROGRESS") || s.includes("IN PROGRESS"))
-    cls += "bg-blue-500 text-white";
+    cls += "bg-blue-500/20 text-blue-600 border border-blue-200";
   else if (s.includes("REVIISION") || s.includes("REVISIÓN") || s.includes("REVIEW") || s.includes("QA"))
-    cls += "bg-purple-500 text-white";
-  else if (s.includes("BLOQUEADO") || s.includes("BLOCKED")) cls += "bg-red-500 text-white";
-  else if (s.includes("ELIMINADO") || s.includes("DUPLICADO")) cls += "bg-zinc-500 text-white";
-  else cls += "bg-amber-500 text-white";
+    cls += "bg-purple-500/20 text-purple-600 border border-purple-200";
+  else if (s.includes("BLOQUEADO") || s.includes("BLOCKED")) cls += "bg-red-500/20 text-red-600 border border-red-200";
+  else if (s.includes("ELIMINADO") || s.includes("DUPLICADO")) cls += "bg-zinc-100 text-zinc-500 border border-zinc-200";
+  else cls += "bg-amber-500/20 text-amber-600 border border-amber-200";
   return <span className={cls}>{status}</span>;
 }
 
 function PriorityBadge({ priority }) {
   const p = (priority || "").toLowerCase();
-  let cls = "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ";
+  let cls = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ";
   if (p.includes("highest") || p.includes("blocker") || p.includes("critical") || p.includes("high"))
-    cls += "bg-red-600 text-white";
-  else if (p.includes("medium") || p.includes("med")) cls += "bg-amber-500 text-white";
-  else if (p.includes("low") || p.includes("lowest")) cls += "bg-emerald-500 text-white";
-  else cls += "bg-zinc-600 text-white";
+    cls += "bg-red-50 text-red-600 border-red-200";
+  else if (p.includes("medium") || p.includes("med")) cls += "bg-amber-50 text-amber-600 border-amber-200";
+  else if (p.includes("low") || p.includes("lowest")) cls += "bg-emerald-50 text-emerald-600 border-emerald-200";
+  else cls += "bg-blue-50 text-blue-500 border-blue-200";
   return <span className={cls}>{priority || "—"}</span>;
 }
+
 export default function SprintProgressFrederick({ sidebarOpen, setSidebarOpen }) {
   const [loading, setLoading] = useState(false);
   const [tickets, setTickets] = useState([]);
@@ -79,58 +80,60 @@ export default function SprintProgressFrederick({ sidebarOpen, setSidebarOpen })
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      {/* Header móvil con botón sidebar — fuera del scroll para evitar rebotes */}
-      <header className="bg-background border-b px-4 py-3 flex items-center gap-3 lg:hidden flex-shrink-0">
-        <button
-          onClick={() => setSidebarOpen((v) => !v)}
-          aria-label="Abrir panel"
-          className="size-8 bg-primary/10 hover:bg-primary/20 text-primary rounded-md shadow-sm ring-1 ring-primary/25 flex items-center justify-center flex-shrink-0">
-          <PanelLeftOpen size={16} />
-        </button>
-        <h1 className="text-base font-semibold tracking-tight truncate">🏃 Sprint Frederick</h1>
+      <header className="page-header flex-shrink-0">
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSidebarOpen((v) => !v)}
+              aria-label="Abrir panel"
+              className="lg:hidden size-9 flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors flex-shrink-0">
+              <PanelLeftOpen size={16} />
+            </button>
+            <div>
+              <h1 className="text-lg sm:text-xl font-heading navy-gradient-text">Sprint Frederick</h1>
+              <p className="text-[10px] text-blue-400/60 font-medium tracking-wider uppercase">{sprintName}</p>
+            </div>
+          </div>
+          <button onClick={load} disabled={loading} className="btn-outline text-xs">
+            <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
+            {loading ? "Cargando..." : "Sincronizar"}
+          </button>
+        </div>
       </header>
 
-      {/* Contenido scrollable */}
       <div className="flex-1 overflow-y-auto p-3 sm:p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-lg font-semibold">Sprint: {sprintName}</h1>
-          <Button onClick={load} disabled={loading}>
-            {loading ? "⏳ Cargando..." : "Sincronizar"}
-          </Button>
-        </div>
-
         {error && (
-          <div className="mb-4 p-3 rounded bg-red-900/40 border border-red-700 text-sm text-red-300">
+          <div className="mb-4 p-4 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700">
             <strong>Error:</strong> {error}
             {error.toLowerCase().includes("sprint") && (
-              <p className="mt-1 text-xs text-red-400">
-                Verifica que <code>JIRA_SPRINT_FREDERICK</code> en el <code>.env</code> del backend coincida exactamente
+              <p className="mt-1 text-xs text-red-500/80">
+                Verifica que <code className="text-red-600 font-mono bg-red-100/50 px-1 rounded">JIRA_SPRINT_FREDERICK</code> en el <code className="text-red-600 font-mono bg-red-100/50 px-1 rounded">.env</code> del backend coincida exactamente
                 con el nombre del sprint en Jira.
               </p>
             )}
           </div>
         )}
 
-        <Card className="mb-4">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-2">
+        <Card className="navy-card mb-4 overflow-hidden">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-3">
               <div>
-                <p className="text-sm text-muted-foreground">Avance</p>
-                <p className="text-2xl font-extrabold">{percent}%</p>
+                <p className="section-title">Avance del Sprint</p>
+                <p className="stat-value text-navy-800 mt-0.5">{percent}%</p>
               </div>
               <div className="text-right">
-                <p className="text-sm text-muted-foreground">Finalizados</p>
-                <p className="text-xl font-semibold">
-                  {finished} / {total}
+                <p className="section-title">Finalizados</p>
+                <p className="stat-value text-navy-800 mt-0.5">
+                  {finished} <span className="text-lg font-sans text-blue-400/60">/ {total}</span>
                 </p>
               </div>
             </div>
-            <div className="w-full bg-zinc-800 rounded-full h-3 overflow-hidden mt-4">
+            <div className="w-full bg-blue-100/50 rounded-full h-2.5 overflow-hidden">
               <div
-                className="h-3 transition-all"
+                className="h-full rounded-full transition-all duration-700 ease-out"
                 style={{
                   width: `${percent}%`,
-                  background: `linear-gradient(90deg, #6366f1, #8b5cf6, #a78bfa)`,
+                  background: "linear-gradient(90deg, #2563eb, #3b82f6, #60a5fa)",
                 }}
               />
             </div>
@@ -138,22 +141,30 @@ export default function SprintProgressFrederick({ sidebarOpen, setSidebarOpen })
         </Card>
 
         {loading && (
-          <p className="text-sm font-medium text-zinc-500 text-center py-8">Cargando tickets desde Jira...</p>
+          <div className="flex items-center justify-center py-12">
+            <RefreshCw size={20} className="text-blue-400 animate-spin" />
+            <span className="ml-2 text-sm text-blue-400/70 font-medium">Cargando tickets desde Jira...</span>
+          </div>
         )}
 
         {!loading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Card>
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+            <Card className="navy-card lg:col-span-2">
               <CardContent className="p-4">
-                <h2 className="font-semibold mb-2">Estados</h2>
+                <h2 className="text-sm font-semibold text-navy-800 mb-3 flex items-center gap-2">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-500">
+                    <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                  </svg>
+                  Estados
+                </h2>
                 {Object.keys(byStatus).length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No se encontraron tickets en este sprint.</p>
+                  <p className="text-sm text-blue-400/60">No se encontraron tickets en este sprint.</p>
                 ) : (
                   <ul className="space-y-2">
                     {Object.entries(byStatus).map(([st, cnt]) => (
-                      <li key={st} className="flex items-center justify-between">
+                      <li key={st} className="flex items-center justify-between py-1">
                         <StatusBadge status={st} />
-                        <span className="text-sm font-semibold">{cnt}</span>
+                        <span className="text-sm font-bold text-navy-700">{cnt}</span>
                       </li>
                     ))}
                   </ul>
@@ -161,52 +172,57 @@ export default function SprintProgressFrederick({ sidebarOpen, setSidebarOpen })
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="navy-card lg:col-span-3">
               <CardContent className="p-4">
-                <h2 className="font-semibold mb-2">Tickets ({total})</h2>
-                <div className="max-h-96 overflow-auto">
+                <h2 className="text-sm font-semibold text-navy-800 mb-3 flex items-center gap-2">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-500">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>
+                  </svg>
+                  Tickets ({total})
+                </h2>
+                <div className="max-h-96 overflow-auto rounded-lg border border-blue-100/60">
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm min-w-[520px]">
                       <thead>
-                        <tr className="border-b border-zinc-700 text-xs text-muted-foreground">
-                          <th className="text-left py-1 pr-3 font-medium whitespace-nowrap">Ticket</th>
-                          <th className="text-left py-1 pr-3 font-medium">Título</th>
-                          <th className="text-left py-1 pr-3 font-medium whitespace-nowrap">Asignado</th>
-                          <th className="text-left py-1 pr-3 font-medium whitespace-nowrap">Prioridad</th>
-                          <th className="text-left py-1 font-medium whitespace-nowrap">Estado</th>
+                        <tr className="bg-blue-50/50 border-b border-blue-100 text-xs text-blue-400/80">
+                          <th className="text-left py-2.5 px-3 font-semibold whitespace-nowrap">Ticket</th>
+                          <th className="text-left py-2.5 px-3 font-semibold">Título</th>
+                          <th className="text-left py-2.5 px-3 font-semibold whitespace-nowrap">Asignado</th>
+                          <th className="text-left py-2.5 px-3 font-semibold whitespace-nowrap">Prioridad</th>
+                          <th className="text-left py-2.5 px-3 font-semibold whitespace-nowrap">Estado</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-zinc-800">
+                      <tbody className="divide-y divide-blue-50">
                         {sortedTickets.length === 0 && (
                           <tr>
-                            <td colSpan={5} className="py-4 text-center text-muted-foreground">
+                            <td colSpan={5} className="py-8 text-center text-blue-400/60">
                               Sin tickets.
                             </td>
                           </tr>
                         )}
                         {sortedTickets.map((t) => (
-                          <tr key={t.key || t.id} className="hover:bg-zinc-800/40">
-                            <td className="py-2 pr-3 font-medium whitespace-nowrap">
+                          <tr key={t.key || t.id} className="hover:bg-blue-50/30 transition-colors">
+                            <td className="py-2.5 px-3 font-semibold whitespace-nowrap">
                               {ticketUrl(t.key) ? (
                                 <a
                                   href={ticketUrl(t.key)}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="hover:underline text-primary">
+                                  className="text-blue-600 hover:text-blue-700 hover:underline text-xs">
                                   {t.key}
                                 </a>
                               ) : (
-                                <span>{t.key}</span>
+                                <span className="text-xs text-navy-700">{t.key}</span>
                               )}
                             </td>
-                            <td className="py-2 pr-3">{t.summary || "Sin título"}</td>
-                            <td className="py-2 pr-3 whitespace-nowrap text-xs text-muted-foreground">
+                            <td className="py-2.5 px-3 text-navy-700">{t.summary || "Sin título"}</td>
+                            <td className="py-2.5 px-3 whitespace-nowrap text-xs text-blue-400/70">
                               {t.assignee || "—"}
                             </td>
-                            <td className="py-2 pr-3 whitespace-nowrap">
+                            <td className="py-2.5 px-3 whitespace-nowrap">
                               <PriorityBadge priority={t.priority} />
                             </td>
-                            <td className="py-2 whitespace-nowrap">
+                            <td className="py-2.5 px-3 whitespace-nowrap">
                               <StatusBadge status={t.status} />
                             </td>
                           </tr>

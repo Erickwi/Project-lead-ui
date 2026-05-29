@@ -7,10 +7,23 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Outfit Variable', 'Geist Variable', 'sans-serif'],
+        heading: ['DM Serif Display', 'serif'],
+      },
       colors: {
-        brand: {
-          sidebar: '#0f172a',
-          primary: '#2563eb',
+        navy: {
+          50: '#f0f5ff',
+          100: '#e0edff',
+          200: '#b8d4fe',
+          300: '#7cb4fc',
+          400: '#4a94f8',
+          500: '#2563eb',
+          600: '#1d4ed8',
+          700: '#1e3a8a',
+          800: '#153075',
+          900: '#0f1f3d',
+          950: '#0a1628',
         },
         border: "var(--border)",
         input: "var(--input)",
@@ -36,6 +49,9 @@ export default {
         accent: {
           DEFAULT: "var(--accent)",
           foreground: "var(--accent-foreground)",
+        },
+        "accent-blue": {
+          DEFAULT: "var(--accent-blue)",
         },
         popover: {
           DEFAULT: "var(--popover)",
@@ -74,9 +90,6 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-      },
-      transitionProperty: {
-        drawer: 'transform',
       },
     },
   },

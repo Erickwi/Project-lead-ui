@@ -28,16 +28,23 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { ChevronLeft, ChevronRight, LayoutDashboard, BarChart2, Plus, Activity } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  LayoutDashboard,
+  BarChart2,
+  Plus,
+  Activity,
+  Package,
+  StickyNote,
+  PanelLeftClose,
+  PanelLeftOpen,
+} from "lucide-react";
 
 const PRIORITY_CFG = {
-  Alta: { border: "border-l-red-500", badge: "bg-red-100 text-red-700 hover:bg-red-100", dot: "bg-red-500" },
-  Media: {
-    border: "border-l-yellow-400",
-    badge: "bg-yellow-100 text-yellow-700 hover:bg-yellow-100",
-    dot: "bg-yellow-400",
-  },
-  Baja: { border: "border-l-green-500", badge: "bg-green-100 text-green-700 hover:bg-green-100", dot: "bg-green-500" },
+  Alta: { border: "border-l-red-400", badge: "bg-red-500/20 text-red-300", dot: "bg-red-400" },
+  Media: { border: "border-l-amber-400", badge: "bg-amber-500/20 text-amber-300", dot: "bg-amber-400" },
+  Baja: { border: "border-l-emerald-400", badge: "bg-emerald-500/20 text-emerald-300", dot: "bg-emerald-400" },
 };
 
 function getTodayDate() {
@@ -62,7 +69,7 @@ function SidebarDateDisplay({ fecha }) {
     );
   }, [fecha]);
   return (
-    <span className="text-xs text-zinc-500" suppressHydrationWarning>
+    <span className="text-xs text-blue-300/60" suppressHydrationWarning>
       {dateStr}
     </span>
   );
@@ -91,15 +98,16 @@ function SortableItem({ rec, onEdit, onDelete }) {
       role="button"
       aria-label={`recordatorio-${rec.id}`}
       tabIndex={0}
-      className={`bg-zinc-900 border-l-4 ${cfg.border} rounded-r-lg p-3 group transition-all hover:bg-zinc-800 cursor-grab active:cursor-grabbing touch-none`}
+      className={`bg-white/5 border-l-[3px] ${cfg.border} rounded-lg p-3 group transition-all hover:bg-white/[0.08] cursor-grab active:cursor-grabbing touch-none`}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.stopPropagation();
         }
-      }}>
+      }}
+    >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-zinc-100 leading-snug break-all whitespace-pre-wrap max-h-20 overflow-auto">
+          <p className="text-sm text-blue-100/90 leading-snug break-all whitespace-pre-wrap max-h-20 overflow-auto">
             {rec.descripcion}
           </p>
         </div>
@@ -113,8 +121,11 @@ function SortableItem({ rec, onEdit, onDelete }) {
               onEdit(rec);
             }}
             title="Editar"
-            className="size-6 text-zinc-400 hover:text-zinc-100 hover:bg-transparent cursor-pointer">
-            ✏️
+            className="size-6 text-blue-400/50 hover:text-blue-200 hover:bg-white/5 cursor-pointer"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+            </svg>
           </Button>
           <Button
             variant="ghost"
@@ -125,13 +136,16 @@ function SortableItem({ rec, onEdit, onDelete }) {
               onDelete(rec.id);
             }}
             title="Eliminar"
-            className="size-6 text-zinc-400 hover:text-red-400 hover:bg-transparent cursor-pointer">
-            🗑️
+            className="size-6 text-blue-400/50 hover:text-red-300 hover:bg-white/5 cursor-pointer"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+            </svg>
           </Button>
         </div>
       </div>
-      <div className="flex items-center gap-2 mt-2">
-        <Badge className={`text-xs font-semibold ${cfg.badge}`}>{rec.prioridad}</Badge>
+      <div className="flex items-center gap-2 mt-2.5">
+        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${cfg.badge}`}>{rec.prioridad}</span>
         {rec.fecha && <SidebarDateDisplay fecha={rec.fecha} />}
       </div>
     </div>
@@ -139,9 +153,9 @@ function SortableItem({ rec, onEdit, onDelete }) {
 }
 
 const NAV_ITEMS = [
-  { id: "dashboard", label: "📊 Dashboard", title: "Centro de Mando" },
-  { id: "reporte", label: "📈 Reporte", title: "Reporte de Versión" },
-  { id: "finalizados", label: "📦 Finalizados", title: "Finalizados por Fecha" },
+  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "reporte", label: "Reporte", icon: BarChart2 },
+  { id: "finalizados", label: "Finalizados", icon: Package },
 ];
 
 export default function Sidebar({ currentPage = "dashboard", collapsed, onToggleCollapsed, onCloseMobile }) {
@@ -175,8 +189,6 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
 
     const newSorted = arrayMove(sortedRecordatorios, oldIndex, newIndex);
     const newIds = newSorted.map((r) => Number(r.id));
-
-    // Optimistic update - reorder hace la llamada API sin await
     reorder(newIds);
   };
 
@@ -220,200 +232,206 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
     }
   };
 
-  return (
-    <>
-      {/* ── Sidebar colapsado: strip vertical fino ── */}
-      {collapsed && (
-        <aside className="w-full flex-shrink-0 flex flex-col items-center bg-zinc-950 h-screen border-r border-zinc-800 py-3 gap-3 z-10">
-          {/* Botón expandir */}
-          <button
-            onClick={() => onToggleCollapsed(false)}
-            title="Mostrar panel"
-            className="size-8 flex items-center justify-center rounded-md text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors">
-            <ChevronRight size={16} />
-          </button>
+  if (collapsed) {
+    return (
+      <aside className="w-full h-full flex-shrink-0 flex flex-col items-center bg-navy-950 border-r border-navy-800/50 py-4 gap-3 z-10">
+        <button
+          onClick={() => onToggleCollapsed(false)}
+          title="Expandir panel"
+          className="size-9 flex items-center justify-center rounded-lg text-blue-400 hover:text-blue-200 hover:bg-white/5 transition-colors"
+        >
+          <ChevronRight size={16} />
+        </button>
 
-          {/* Nav icons */}
-          <div className="flex flex-col gap-2 mt-1">
-            <button
-              onClick={() => handleNavigate("/")}
-              title="Dashboard"
-              className={`size-8 flex items-center justify-center rounded-md transition-colors ${
-                currentPage === "dashboard"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800"
-              }`}>
-              <LayoutDashboard size={15} />
-            </button>
-            <button
-              onClick={() => handleNavigate("/reporte")}
-              title="Reporte"
-              className={`size-8 flex items-center justify-center rounded-md transition-colors ${
-                currentPage === "reporte"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800"
-              }`}>
-              <BarChart2 size={15} />
-            </button>
-            <button
-              onClick={() => handleNavigate("/sprint/frederick")}
-              title="Sprint Frederick"
-              className={`size-8 flex items-center justify-center rounded-md transition-colors ${
-                currentPage === "sprint"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800"
-              }`}>
-              <Activity size={15} />
-            </button>
-          </div>
-
-          {/* Nueva nota (solo icono) */}
-          <div className="mt-auto mb-1">
-            <button
-              onClick={() => {
-                openCreate();
-              }}
-              title="Nueva nota"
-              className="size-8 flex items-center justify-center rounded-md text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800 transition-colors">
-              <Plus size={15} />
-            </button>
-          </div>
-        </aside>
-      )}
-      {!collapsed && (
-        <aside className="w-full flex-shrink-0 flex flex-col bg-zinc-950 h-screen overflow-hidden">
-          {/* Navegación principal + botón colapsar */}
-          <nav className="px-3 pt-3 pb-2 border-b border-zinc-800 flex items-center">
-            <div className="flex-1 overflow-x-auto">
-              <div className="flex gap-1 items-center whitespace-nowrap">
-                {NAV_ITEMS.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => handleNavigate(item.id === "dashboard" ? "/" : `/${item.id}`)}
-                    title={item.title}
-                    className={`flex-none inline-flex items-center justify-center min-w-[110px] text-xs font-semibold py-1.5 px-2 rounded transition-colors ${
-                      currentPage === item.id
-                        ? "bg-primary text-primary-foreground"
-                        : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
-                    }`}>
-                    {item.label}
-                  </button>
-                ))}
-
-                <button
-                  onClick={() => handleNavigate("/sprint/frederick")}
-                  title="Sprint Frederick"
-                  className={`flex-none inline-flex items-center justify-center min-w-[140px] text-xs font-semibold py-1.5 px-2 rounded transition-colors ${
-                    currentPage === "sprint"
-                      ? "bg-primary text-primary-foreground"
-                      : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
-                  }`}>
-                  🏃 Sprint Frederick
-                </button>
-              </div>
-            </div>
-
-            {/* Colapsar (fijo a la derecha) */}
-            <div className="ml-2 flex-shrink-0">
+        <div className="flex flex-col gap-2 mt-2 w-full px-2">
+          {NAV_ITEMS.map((item) => {
+            const Icon = item.icon;
+            return (
               <button
-                onClick={() => onToggleCollapsed(true)}
-                title="Ocultar panel"
-                className="size-7 flex items-center justify-center rounded text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800 transition-colors">
-                <ChevronLeft size={15} />
+                key={item.id}
+                onClick={() => handleNavigate(item.id === "dashboard" ? "/" : `/${item.id}`)}
+                title={item.label}
+                className={`w-full flex items-center justify-center h-9 rounded-lg transition-all ${
+                  currentPage === item.id
+                    ? "bg-blue-600 text-white shadow-sm shadow-blue-600/30"
+                    : "text-blue-400/60 hover:text-blue-200 hover:bg-white/5"
+                }`}
+              >
+                <Icon size={16} />
               </button>
-            </div>
-          </nav>
+            );
+          })}
+          <button
+            onClick={() => handleNavigate("/sprint/frederick")}
+            title="Sprint Frederick"
+            className={`w-full flex items-center justify-center h-9 rounded-lg transition-all ${
+              currentPage === "sprint"
+                ? "bg-blue-600 text-white shadow-sm shadow-blue-600/30"
+                : "text-blue-400/60 hover:text-blue-200 hover:bg-white/5"
+            }`}
+          >
+            <Activity size={16} />
+          </button>
+        </div>
 
-          {/* Header */}
-          <div className="px-4 py-4 border-b border-zinc-800 flex items-center justify-between">
-            <h2 className="text-sm font-semibold tracking-wider text-zinc-100 uppercase">📋 Notas y Recordatorios</h2>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={filterTelegram}
-                  onCheckedChange={(v) => setFilterTelegram(!!v)}
-                  className="flex-shrink-0"
-                />
-                <span className="text-xs text-zinc-300">Telegram</span>
-              </div>
+        <div className="mt-auto mb-2">
+          <button
+            onClick={openCreate}
+            title="Nueva nota"
+            className="size-9 flex items-center justify-center rounded-lg text-blue-400/60 hover:text-blue-200 hover:bg-white/5 transition-colors"
+          >
+            <Plus size={16} />
+          </button>
+        </div>
+      </aside>
+    );
+  }
 
-              <Button
-                size="sm"
-                onClick={openCreate}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold">
-                + Nuevo
-              </Button>
-            </div>
+  return (
+    <aside className="w-full h-full flex flex-col bg-navy-950 overflow-hidden border-r border-navy-800/50">
+      {/* Brand */}
+      <div className="px-5 pt-5 pb-4 flex items-center justify-between border-b border-navy-800/30">
+        <div className="flex items-center gap-3">
+          <div className="size-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-sm shadow-blue-600/20">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+            </svg>
           </div>
+          <div>
+            <h1 className="text-sm font-semibold text-white tracking-tight">Ecomex 360</h1>
+            <p className="text-[10px] text-blue-300/50 font-medium tracking-wider uppercase">Project Lead</p>
+          </div>
+        </div>
+        <button
+          onClick={() => onToggleCollapsed(true)}
+          title="Colapsar panel"
+          className="size-7 flex items-center justify-center rounded-md text-blue-400/40 hover:text-blue-200 hover:bg-white/5 transition-colors"
+        >
+          <PanelLeftClose size={14} />
+        </button>
+      </div>
 
-          {/* Lista */}
-          <ScrollArea className="flex-1 p-3 overflow-y-auto">
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-              <SortableContext items={sortedRecordatorios.map((r) => r.id)} strategy={verticalListSortingStrategy}>
-                <div className="flex flex-col gap-y-2">
-                  {loading && (
-                    <div className="space-y-2 mt-2">
-                      {[1, 2, 3, 4, 5].map((i) => (
-                        <div
-                          key={`skeleton-${i}`}
-                          className="bg-zinc-900 border-l-4 border-l-zinc-700 rounded-r-lg p-3 space-y-2">
-                          <Skeleton className="h-3 w-full bg-zinc-800/50" />
-                          <Skeleton className="h-3 w-3/4 bg-zinc-800/50" />
-                          <div className="flex items-center gap-2">
-                            <Skeleton className="h-4 w-14 rounded-full bg-zinc-800/50" />
-                            <Skeleton className="h-3 w-16 bg-zinc-800/50" />
-                          </div>
-                        </div>
-                      ))}
+      {/* Navigation */}
+      <nav className="px-3 pt-4 pb-2">
+        <p className="section-title px-3 mb-2">Navegación</p>
+        <div className="space-y-0.5">
+          {NAV_ITEMS.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleNavigate(item.id === "dashboard" ? "/" : `/${item.id}`)}
+                className={`sidebar-link w-full text-left ${
+                  currentPage === item.id ? "active" : ""
+                }`}
+              >
+                <Icon size={16} className={currentPage === item.id ? "text-blue-400" : ""} />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+          <button
+            onClick={() => handleNavigate("/sprint/frederick")}
+            className={`sidebar-link w-full text-left ${
+              currentPage === "sprint" ? "active" : ""
+            }`}
+          >
+            <Activity size={16} className={currentPage === "sprint" ? "text-blue-400" : ""} />
+            <span>Sprint Frederick</span>
+          </button>
+        </div>
+      </nav>
+
+      {/* Notes section */}
+      <div className="px-5 pt-4 pb-2 flex items-center justify-between border-t border-navy-800/30 mt-1">
+        <div className="flex items-center gap-2">
+          <StickyNote size={14} className="text-blue-400/60" />
+          <h2 className="text-xs font-semibold tracking-wider text-blue-200/80 uppercase">Notas</h2>
+        </div>
+        <div className="flex items-center gap-2">
+          <Switch
+            checked={filterTelegram}
+            onCheckedChange={(v) => setFilterTelegram(!!v)}
+            className="scale-75 data-[state=checked]:bg-blue-600"
+          />
+          <span className="text-[10px] text-blue-300/50 font-medium">TG</span>
+          <Button
+            size="sm"
+            onClick={openCreate}
+            className="h-7 w-7 p-0 rounded-lg bg-blue-600 hover:bg-blue-500 text-white shadow-sm shadow-blue-600/20"
+          >
+            <Plus size={14} />
+          </Button>
+        </div>
+      </div>
+
+      <ScrollArea className="flex-1 px-3 pb-2 overflow-y-auto">
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={sortedRecordatorios.map((r) => r.id)} strategy={verticalListSortingStrategy}>
+            <div className="flex flex-col gap-y-2 pt-1">
+              {loading && (
+                <div className="space-y-2 mt-2">
+                  {[1, 2, 3].map((i) => (
+                    <div key={`skeleton-${i}`} className="bg-white/5 rounded-lg p-3 space-y-2">
+                      <Skeleton className="h-3 w-full bg-white/10" />
+                      <Skeleton className="h-3 w-3/4 bg-white/10" />
+                      <div className="flex items-center gap-2 mt-2">
+                        <Skeleton className="h-4 w-12 rounded-full bg-white/10" />
+                        <Skeleton className="h-3 w-14 bg-white/10" />
+                      </div>
                     </div>
-                  )}
-                  {!loading && recordatorios.length === 0 && (
-                    <p className="text-zinc-500 text-xs text-center mt-8 leading-relaxed">
-                      Sin recordatorios aún.
-                      <br />
-                      Crea el primero con el botón +
-                    </p>
-                  )}
-                  {displayRecordatorios.map((rec) => (
-                    <SortableItem
-                      key={rec.id}
-                      rec={rec}
-                      onEdit={openEdit}
-                      onDelete={async (id) => {
-                        const ok = confirm("¿Estás seguro que quieres eliminar esta nota?");
-                        if (!ok) return;
-                        try {
-                          await eliminar(id);
-                        } catch (err) {
-                          console.error("Error al eliminar desde Sidebar:", err.message);
-                        }
-                      }}
-                    />
                   ))}
                 </div>
-              </SortableContext>
-            </DndContext>
-          </ScrollArea>
+              )}
+              {!loading && recordatorios.length === 0 && (
+                <p className="text-blue-300/40 text-xs text-center mt-8 leading-relaxed">
+                  Sin notas aún.
+                  <br />
+                  Crea la primera con el botón +
+                </p>
+              )}
+              {displayRecordatorios.map((rec) => (
+                <SortableItem
+                  key={rec.id}
+                  rec={rec}
+                  onEdit={openEdit}
+                  onDelete={async (id) => {
+                    const ok = confirm("¿Estás seguro que quieres eliminar esta nota?");
+                    if (!ok) return;
+                    try {
+                      await eliminar(id);
+                    } catch (err) {
+                      console.error("Error al eliminar desde Sidebar:", err.message);
+                    }
+                  }}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+      </ScrollArea>
 
-          {/* Footer version */}
-          <div className="px-4 py-3 border-t border-zinc-800">
-            <p className="text-xs text-zinc-600 text-center">Sprint v - Ecomex 360</p>
-          </div>
-        </aside>
-      )}
+      {/* Footer version */}
+      <div className="px-5 py-3 border-t border-navy-800/30">
+        <p className="text-[10px] text-blue-300/30 text-center font-medium tracking-wider">
+          {currentSprintTitle || "Sprint Activo"} · Ecomex 360
+        </p>
+      </div>
 
       {/* Modal */}
       <Dialog open={modal} onOpenChange={setModal}>
-        <DialogContent className="max-w-md" showCloseButton={false}>
+        <DialogContent className="max-w-md bg-navy-900 border-navy-700 text-white">
           <DialogHeader>
-            <DialogTitle>{editingId ? "✏️ Editar Recordatorio" : "➕ Nuevo Recordatorio"}</DialogTitle>
-            <DialogDescription className="sr-only">Formulario para crear o editar recordatorio</DialogDescription>
+            <DialogTitle className="text-blue-100 font-heading text-xl">
+              {editingId ? "Editar Nota" : "Nueva Nota"}
+            </DialogTitle>
+            <DialogDescription className="sr-only">Formulario para crear o editar nota</DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="descripcion">
-                Descripción <span className="text-red-500">*</span>
+              <Label htmlFor="descripcion" className="text-blue-200/80 text-sm">
+                Descripción <span className="text-red-400">*</span>
               </Label>
               <Textarea
                 id="descripcion"
@@ -423,18 +441,18 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
                 placeholder="Describe la tarea o nota importante..."
                 value={form.descripcion}
                 onChange={(e) => setForm((f) => ({ ...f, descripcion: e.target.value }))}
-                className="resize-none"
+                className="resize-none bg-navy-800 border-navy-600 text-blue-100 placeholder:text-blue-300/30 focus:border-blue-500"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>Prioridad</Label>
+                <Label className="text-blue-200/80 text-sm">Prioridad</Label>
                 <Select value={form.prioridad} onValueChange={(val) => setForm((f) => ({ ...f, prioridad: val }))}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-navy-800 border-navy-600 text-blue-100">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-navy-800 border-navy-600 text-blue-100">
                     <SelectItem value="Alta">Alta</SelectItem>
                     <SelectItem value="Media">Media</SelectItem>
                     <SelectItem value="Baja">Baja</SelectItem>
@@ -442,44 +460,42 @@ export default function Sidebar({ currentPage = "dashboard", collapsed, onToggle
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="fecha">Fecha límite</Label>
+                <Label htmlFor="fecha" className="text-blue-200/80 text-sm">Fecha límite</Label>
                 <Input
                   id="fecha"
                   type="date"
                   value={form.fecha}
                   onChange={(e) => setForm((f) => ({ ...f, fecha: e.target.value }))}
+                  className="bg-navy-800 border-navy-600 text-blue-100 [color-scheme:dark]"
                 />
-              </div>
-              <div className="space-y-1.5 flex items-end">
-                <label className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={!!form.enviar_telegram}
-                    onChange={(e) => setForm((f) => ({ ...f, enviar_telegram: e.target.checked }))}
-                    className="size-4"
-                  />
-                  <span className="text-zinc-300">Enviar por Telegram</span>
-                </label>
               </div>
             </div>
 
-            <DialogFooter>
-              <Button type="button" variant="ghost" onClick={() => setModal(false)} disabled={submitting}>
+            <label className="flex items-center gap-2 text-sm text-blue-200/70">
+              <input
+                type="checkbox"
+                checked={!!form.enviar_telegram}
+                onChange={(e) => setForm((f) => ({ ...f, enviar_telegram: e.target.checked }))}
+                className="size-4 rounded border-navy-600 bg-navy-800 accent-blue-600"
+              />
+              Enviar por Telegram
+            </label>
+
+            <DialogFooter className="gap-2">
+              <Button type="button" variant="ghost" onClick={() => setModal(false)} disabled={submitting}
+                className="text-blue-200/60 hover:text-blue-100 hover:bg-white/5">
                 Cancelar
               </Button>
-              <Button type="submit" disabled={submitting}>
+              <Button type="submit" disabled={submitting}
+                className="bg-blue-600 hover:bg-blue-500 text-white">
                 {editingId
-                  ? submitting
-                    ? "Guardando..."
-                    : "Guardar cambios"
-                  : submitting
-                    ? "Creando..."
-                    : "Crear recordatorio"}
+                  ? submitting ? "Guardando..." : "Guardar cambios"
+                  : submitting ? "Creando..." : "Crear nota"}
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
-    </>
+    </aside>
   );
 }
